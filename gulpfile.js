@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     webserver = require('gulp-webserver'),
-    eslint = require('gulp-eslint');
+    eslint = require('gulp-eslint'),
+    jasmine = require('gulp-jasmine');
 
 gulp.task('webserver', function() {
   gulp.src('app')
@@ -8,6 +9,11 @@ gulp.task('webserver', function() {
       livereload: true,
       open: true
     }));
+});
+
+gulp.task('test', function() {
+  gulp.src('spec/test.js')
+    .pipe(jasmine());
 });
 
 gulp.task('eslint', function() {
