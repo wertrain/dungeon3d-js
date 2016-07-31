@@ -1,0 +1,23 @@
+{
+  "name": "dungeon3d-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wertrain/dungeon3d-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wertrain/dungeon3d-js/issues"
+  },
+  "homepage": "https://github.com/wertrain/dungeon3d-js#readme",
+  "dependencies": {
+    "gulp": "3.9.1",
+    "gulp-webserver": "0.9.1"
+  }
+}
