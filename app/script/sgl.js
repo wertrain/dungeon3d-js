@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 var SimpleGL = function() {
     this.canvas = null;

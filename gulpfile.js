@@ -12,7 +12,7 @@ gulp.task('webserver', function() {
 });
 
 gulp.task('test', function() {
-    gulp.src('spec/test.js')
+    gulp.src('spec/*_spec.js')
         .pipe(jasmine());
 });
 

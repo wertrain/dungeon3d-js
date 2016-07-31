@@ -12,7 +12,8 @@
     },
     "globals": {
         "dungeon3d": true,
-        "SimpleGL": true
+        "SimpleGL": true,
+        "exports": true
     },
     "rules": {
         "no-console":0

@@ -1,4 +1,5 @@
-'use strict'
+'use strict';
+
 {
     /** 四角形のインデックス情報 */
     let RectBlock = function() {
@@ -74,5 +75,15 @@
         rectManager.initalize(this.map, this.width, this.height);
         return true;
     };
-    dungeon3d.Map = Map;
+    Map.prototype.getWidth = function() {
+        return this.width;
+    };
+    Map.prototype.getHeight = function() {
+        return this.height;
+    }
+    if (typeof dungeon3d === 'undefined') {
+        exports.Map = Map;
+    } else {
+        dungeon3d.Map = Map;
+    }
 }

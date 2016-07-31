@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 {
     let sgl = new SimpleGL();
