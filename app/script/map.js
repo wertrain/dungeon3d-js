@@ -1,3 +1,4 @@
+'use strict'
 {
     /** 四角形のインデックス情報 */
     let RectBlock = function() {

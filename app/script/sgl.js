@@ -1,3 +1,5 @@
+'use strict'
+
 var SimpleGL = function() {
     this.canvas = null;
     this.gl = null;

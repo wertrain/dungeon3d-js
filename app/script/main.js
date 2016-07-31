@@ -1,3 +1,5 @@
+'use strict'
+
 {
     let sgl = new SimpleGL();
     sgl.initalize('canvas', 640, 480);
