@@ -1,4 +1,4 @@
-var main = function() {
+{
     let sgl = new SimpleGL();
     sgl.initalize('canvas', 640, 480);
     sgl.loadFiles(['shader/vertex.vs', 'shader/fragment.fs']).then(responses => {
@@ -30,4 +30,4 @@ var main = function() {
     .catch((e) => {
         console.log('error: ' + e);
     });
-}();
+}
