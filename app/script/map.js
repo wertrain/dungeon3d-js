@@ -375,6 +375,12 @@
     RectManager.prototype.getVertexCount = function() {
         return this.endVertex;
     };
+    RectManager.prototype.getRect = function() {
+        return this.rect;
+    };
+    RectManager.prototype.getVertexArray = function() {
+        return this.vertexArray;
+    };
     RectManager.prototype.debugPrint = function() {
         for (let z = 0; z < this.height; ++z) {
             for (let x = 0; x < this.width; ++x) {
@@ -392,6 +398,7 @@
         this.map = null;
         this.width = 0;
         this.height = 0;
+        this.rectManager = null;
     };
     Map.prototype.initalize = function() {
         this.width = 20;
@@ -403,10 +410,10 @@
             [1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,1],
             [1,0,1,0,0,1,0,1,0,1,0,1,1,1,0,0,0,1,0,1],
             [1,0,1,0,0,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
-            [1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,0,1,0,1,0,0,0,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,0,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+            [1,0,1,0,1,1,0,1,1,1,0,1,0,0,0,1,0,1,0,1],
             [1,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
             [1,0,1,0,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1],
             [1,0,1,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,1],
@@ -418,13 +425,20 @@
             [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
-        let rectManager = new RectManager();
-        rectManager.initalize(this.map, this.width, this.height);
-        rectManager.makeFloor(this.map, 10, 10);
-        rectManager.makeTopWall(this.map);
-        rectManager.makeOuterWall(this.map);
-        rectManager.makeInnerWall(this.map, 10, 10);
-        rectManager.debugPrint();
+        let wallHeight = 2;
+        for (let y = 0; y < this.height; ++y) {
+            for (let x = 0; x < this.width; ++x) {
+                if (this.map[y][x] === 1) {
+                    this.map[y][x] = wallHeight;
+                }
+            }
+        }
+        this.rectManager = new RectManager();
+        this.rectManager.initalize(this.map, this.width, this.height);
+        this.rectManager.makeFloor(this.map, 20, 20);
+        this.rectManager.makeTopWall(this.map);
+        this.rectManager.makeOuterWall(this.map);
+        this.rectManager.makeInnerWall(this.map, 20, 20);
         return true;
     };
     Map.prototype.getWidth = function() {
@@ -432,11 +446,72 @@
     };
     Map.prototype.getHeight = function() {
         return this.height;
-    }
+    };
+
+    /** マップ描画 */
+    let MapRenderer = function() {
+        this.renderObject = {};
+        this.uniLocationArray = [];
+        this.attLocationArray = [];
+        this.attStrideArray = [];
+    };
+    MapRenderer.prototype.initalize = function(map, sgl, vs, fs) {
+        let gl = sgl.getGL();
+        let program = sgl.linkProgram(vs, fs);
+        gl.useProgram(program);
+
+        let rect = map.rectManager.getRect();
+        let vertexArray = map.rectManager.getVertexArray();
+        let vboArray = [];
+        for (let y = 0; y < map.height; ++y) {
+            for (let x = 0; x < map.width; ++x) {
+                let vertices = [];
+                for (let i = 0; i < 4; ++i) {
+                    Array.prototype.push.apply(vertices, 
+                        vertexArray[rect[y][x][i]].slice(0, 3));
+                }
+                let vbo = sgl.createVBO(vertices);
+                vboArray.push(vbo);
+            }
+        }
+        this.renderObject.vboArray = vboArray;
+
+        let vertexIndices = [0, 1, 3, 3, 2, 1];
+        let ibo = sgl.createIBO(vertexIndices);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+        this.renderObject.ibo = ibo;
+        this.renderObject.indicesLength = vertexIndices.length;
+
+        this.uniLocationArray[0] = gl.getUniformLocation(program, 'mvpMatrix');
+        this.attLocationArray[0] = gl.getAttribLocation(program, 'position');
+        this.attStrideArray[0] = 3;
+    };
+    MapRenderer.prototype.render = function(gl) {
+        var m = new matIV();
+        var mMatrix = m.identity(m.create());
+        var vMatrix = m.identity(m.create());
+        var pMatrix = m.identity(m.create());
+        var mvpMatrix = m.identity(m.create());
+        m.lookAt([0.0, 40.0, 0.0], [10, 0, 10], [0, 1, 0], vMatrix);
+        m.perspective(45, 640 / 480, 0.001, 1000, pMatrix);
+        m.multiply(pMatrix, vMatrix, mvpMatrix);
+        m.multiply(mvpMatrix, mMatrix, mvpMatrix);
+        gl.uniformMatrix4fv(this.uniLocationArray[0], false, mvpMatrix);
+
+        for (let i = 0; i < this.renderObject.vboArray.length; ++i) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.vboArray[i]);
+            gl.enableVertexAttribArray(this.attLocationArray[0]);
+            gl.vertexAttribPointer(this.attLocationArray[0], this.attStrideArray[0], gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.renderObject.ibo);
+            gl.drawElements(gl.TRIANGLES, this.renderObject.indicesLength, gl.UNSIGNED_SHORT, 0);
+        }
+    };
+
     if (typeof dungeon3d === 'undefined') {
         exports.Map = Map;
         exports.Array2d = Array2d;
     } else {
         dungeon3d.Map = Map;
+        dungeon3d.MapRenderer = MapRenderer;
     }
 }
