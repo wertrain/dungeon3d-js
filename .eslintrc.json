@@ -13,7 +13,8 @@
     "globals": {
         "dungeon3d": true,
         "SimpleGL": true,
-        "exports": true
+        "exports": true,
+        "matIV": true
     },
     "rules": {
         "no-console":0
