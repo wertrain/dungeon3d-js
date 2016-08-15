@@ -455,8 +455,10 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
-    MapRenderer.prototype.initalize = function(map, sgl, vs, fs) {
+    MapRenderer.prototype.initalize = function(map, sgl, responses) {
         let gl = sgl.getGL();
+        let vs = sgl.compileShader(0, responses[0]);
+        let fs = sgl.compileShader(1, responses[1]);
         let program = sgl.linkProgram(vs, fs);
         gl.useProgram(program);
 

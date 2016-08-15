@@ -40,6 +40,13 @@ SimpleGL.prototype.loadFiles = function(urls) {
         var count = 0;
         return function(e) {
             if (this.status == 200) {
+                var target = param;
+                if (this.arrayIndex !== -1) {
+                    if (typeof param[this.arrayIndex] === 'undefined') {
+                        param[this.arrayIndex] = new Array();
+                    }
+                    target = param[this.arrayIndex];
+                }
                 if (this.responseType === 'blob') {
                     var image = new Image();
                     image.onload = function() {
@@ -49,9 +56,9 @@ SimpleGL.prototype.loadFiles = function(urls) {
                         }
                     };
                     image.src = window.URL.createObjectURL(this.response);
-                    param[this.index] = image;
+                    target[this.fileIndex] = image;
                 } else {
-                    param[this.index] = this.response;
+                    target[this.fileIndex] = this.response;
                     if (++count === allItemCount) {
                         cb(param);
                     }
@@ -61,26 +68,49 @@ SimpleGL.prototype.loadFiles = function(urls) {
             }
         };
     }
+    function createRequest(arrayIndex, fileIndex, url, onload) {
+        var request = new XMLHttpRequest();
+        request.arrayIndex = arrayIndex;
+        request.fileIndex = fileIndex;
+        request.url = url;
+        request.open('GET', url, true);
+        switch (url.split('.').pop().toLowerCase()) {
+            case 'jpg':
+            case 'png':
+            case 'gif':
+                request.responseType = 'blob';
+                break;
+            default:
+                request.responseType = 'text';
+                break;
+        }
+        request.onload = onload;
+        request.send(null);
+    }
     return new Promise(function(resolve, reject){
         var responses = new Array(urls.length);
-        var collector = new XHRCollector(urls.length, resolve, reject, responses);
-        for (var i = 0; i < urls.length; ++i) {
-            var request = new XMLHttpRequest();
-            request.index = i;
-            request.url = urls[i];
-            request.open('GET', urls[i], true);
-            switch (urls[i].split('.').pop().toLowerCase()) {
-                case 'jpg':
-                case 'png':
-                case 'gif':
-                    request.responseType = 'blob';
-                    break;
-                default:
-                    request.responseType = 'text';
-                    break;
+        var allItemCount = 0;
+        var i, j;
+        for (i = 0; i < urls.length; ++i) {
+            if (typeof urls[i] === 'string') {
+                ++allItemCount;
+            } else if (typeof urls[i] === 'object') {
+                allItemCount += urls[i].length;
             }
-            request.onload = collector;
-            request.send(null);
+        }
+        var collector = new XHRCollector(allItemCount, resolve, reject, responses);
+        var fileIndex = 0;
+        for (i = 0; i < urls.length; ++i) {
+            if (typeof urls[i] === 'string') {
+                createRequest(-1, fileIndex++, urls[i], collector);
+            } else if (typeof urls[i] === 'object') {
+                for (j = 0; j < urls[i].length; ++j) {
+                    createRequest(fileIndex, j, urls[i][j], collector);
+                }
+                fileIndex++;
+            } else {
+                console.log('unsupport type.');
+            }
         }
     });
 };
