@@ -18,7 +18,7 @@
     
     /** 四角形の配置管理 */
     let RectManager = function() {
-        this.rect = null;
+        this.rect = null; // Array2d型 (二次元配列) [位置x, 位置y, 位置z, 法線x, 法線y, 法線z, テクスチャUV, テクスチャUV]
         this.rectOrder = null;
         this.vertexArray = null;
         this.wall = null;
@@ -319,9 +319,9 @@
                     let x2 = x + 1;
                     let z1 = z;
                     let u1 = x1 * mulx;
-                    let v1 = (4.0 - y1) * muly;
+                    let v1 = (1.0 - y1) * muly;
                     let u2 = x2 * mulx;
-                    let v2 = (4.0 - y2) * muly;
+                    let v2 = (1.0 - y2) * muly;
                     let nz = sign(y1 - y2);
 
                     if (x > 0 && y1 === map[z-1][x-1] && y2 === map[z][x-1]) {
@@ -346,9 +346,9 @@
                     let x1 = x;
                     let z1 = z;
                     let z2 = z + 1;
-                    let v1 = (4.0 - y1) * muly;
+                    let v1 = (1.0 - y1) * muly;
                     let u1 = z1 * mulx;
-                    let v2 = (4.0 - y2) * muly;
+                    let v2 = (1.0 - y2) * muly;
                     let u2 = z2 * mulx;
                     let nx = sign(y1 - y2);
 
@@ -425,7 +425,7 @@
             [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
-        let wallHeight = 2;
+        let wallHeight = 1;
         for (let y = 0; y < this.height; ++y) {
             for (let x = 0; x < this.width; ++x) {
                 if (this.map[y][x] === 1) {
@@ -435,10 +435,10 @@
         }
         this.rectManager = new RectManager();
         this.rectManager.initalize(this.map, this.width, this.height);
-        this.rectManager.makeFloor(this.map, 20, 20);
+        this.rectManager.makeFloor(this.map, 1, 1);
         this.rectManager.makeTopWall(this.map);
         this.rectManager.makeOuterWall(this.map);
-        this.rectManager.makeInnerWall(this.map, 20, 20);
+        this.rectManager.makeInnerWall(this.map, 10, 10);
         return true;
     };
     Map.prototype.getWidth = function() {
@@ -451,6 +451,8 @@
     /** マップ描画 */
     let MapRenderer = function() {
         this.renderObject = {};
+        this.program = null;
+        this.textureArray = [];
         this.uniLocationArray = [];
         this.attLocationArray = [];
         this.attStrideArray = [];
@@ -459,24 +461,35 @@
         let gl = sgl.getGL();
         let vs = sgl.compileShader(0, responses[0]);
         let fs = sgl.compileShader(1, responses[1]);
-        let program = sgl.linkProgram(vs, fs);
-        gl.useProgram(program);
+        let wtex = sgl.createTexture(responses[2]);
+        let ftex = sgl.createTexture(responses[3]);
+
+        this.program = sgl.linkProgram(vs, fs);
+        gl.useProgram(this.program);
+
+        this.textureArray['wall'] = wtex;
+        this.textureArray['floor'] = ftex;
 
         let rect = map.rectManager.getRect();
         let vertexArray = map.rectManager.getVertexArray();
-        let vboArray = [];
+        let vboArray = [], tboArray = [];
         for (let y = 0; y < map.height; ++y) {
             for (let x = 0; x < map.width; ++x) {
-                let vertices = [];
+                let vertices = [], uvs = [];
                 for (let i = 0; i < 4; ++i) {
                     Array.prototype.push.apply(vertices, 
                         vertexArray[rect[y][x][i]].slice(0, 3));
+                    Array.prototype.push.apply(uvs, 
+                        vertexArray[rect[y][x][i]].slice(6, 8));
                 }
                 let vbo = sgl.createVBO(vertices);
                 vboArray.push(vbo);
+                let tbo = sgl.createVBO(uvs);
+                tboArray.push(tbo);
             }
         }
         this.renderObject.vboArray = vboArray;
+        this.renderObject.tboArray = tboArray;
 
         let vertexIndices = [0, 1, 3, 3, 2, 1];
         let ibo = sgl.createIBO(vertexIndices);
@@ -484,9 +497,16 @@
         this.renderObject.ibo = ibo;
         this.renderObject.indicesLength = vertexIndices.length;
 
-        this.uniLocationArray[0] = gl.getUniformLocation(program, 'mvpMatrix');
-        this.attLocationArray[0] = gl.getAttribLocation(program, 'position');
-        this.attStrideArray[0] = 3;
+        this.uniLocationArray['mvpMatrix'] = gl.getUniformLocation(this.program, 'mvpMatrix');
+        this.uniLocationArray['texture'] = gl.getUniformLocation(this.program, 'texture');
+        this.attLocationArray['position'] = gl.getAttribLocation(this.program, 'position');
+        this.attLocationArray['color'] = gl.getAttribLocation(this.program, 'color');
+        this.attLocationArray['textureCoord'] = gl.getAttribLocation(this.program, 'textureCoord');
+        this.attLocationArray['normal'] = gl.getAttribLocation(this.program, 'normal');
+        this.attStrideArray['position'] = 3;
+        this.attStrideArray['color'] = 4;
+        this.attStrideArray['textureCoord'] = 2;
+        this.attStrideArray['normal'] = 3;
     };
     MapRenderer.prototype.render = function(gl) {
         var m = new matIV();
@@ -494,16 +514,23 @@
         var vMatrix = m.identity(m.create());
         var pMatrix = m.identity(m.create());
         var mvpMatrix = m.identity(m.create());
-        m.lookAt([0.0, 40.0, 0.0], [10, 0, 10], [0, 1, 0], vMatrix);
+        m.lookAt([0.0, 10.0, 0.0], [10, 0, 10], [0, 1, 0], vMatrix);
         m.perspective(45, 640 / 480, 0.001, 1000, pMatrix);
         m.multiply(pMatrix, vMatrix, mvpMatrix);
         m.multiply(mvpMatrix, mMatrix, mvpMatrix);
-        gl.uniformMatrix4fv(this.uniLocationArray[0], false, mvpMatrix);
+        gl.useProgram(this.program);
 
+        gl.uniformMatrix4fv(this.uniLocationArray['mvpMatrix'], false, mvpMatrix);
         for (let i = 0; i < this.renderObject.vboArray.length; ++i) {
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.textureArray['floor']);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.tboArray[i]);
+            gl.enableVertexAttribArray(this.attLocationArray['textureCoord']);
+            gl.vertexAttribPointer(this.attLocationArray['textureCoord'], this.attStrideArray['textureCoord'], gl.FLOAT, false, 0, 0);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.vboArray[i]);
-            gl.enableVertexAttribArray(this.attLocationArray[0]);
-            gl.vertexAttribPointer(this.attLocationArray[0], this.attStrideArray[0], gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(this.attLocationArray['position']);
+            gl.vertexAttribPointer(this.attLocationArray['position'], this.attStrideArray['position'], gl.FLOAT, false, 0, 0);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.renderObject.ibo);
             gl.drawElements(gl.TRIANGLES, this.renderObject.indicesLength, gl.UNSIGNED_SHORT, 0);
         }
