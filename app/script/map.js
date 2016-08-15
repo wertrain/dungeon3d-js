@@ -506,6 +506,9 @@
             gl.drawElements(gl.TRIANGLES, this.renderObject.indicesLength, gl.UNSIGNED_SHORT, 0);
         }
     };
+    MapRenderer.getNeedResouces = function() {
+        return ['shader/vertex.vs', 'shader/fragment.fs', 'image/wall.png', 'image/floor.png'];
+    };
 
     if (typeof dungeon3d === 'undefined') {
         exports.Map = Map;

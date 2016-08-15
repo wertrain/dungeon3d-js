@@ -38,16 +38,15 @@ SimpleGL.prototype.loadFile = function(url, data, successCallback, errorCallback
 SimpleGL.prototype.loadFiles = function(urls) {
     function XHRCollector(allItemCount, cb, ecb, param) {
         var count = 0;
-        return function(error) {
+        return function(e) {
             if (this.status == 200) {
                 if (this.responseType === 'blob') {
                     var image = new Image();
-                    image.onload = function(error) {
+                    image.onload = function() {
                         window.URL.revokeObjectURL(image.src);
                         if (++count === allItemCount) {
                             cb(param);
                         }
-                        console.log(error);
                     };
                     image.src = window.URL.createObjectURL(this.response);
                     param[this.index] = image;
@@ -58,7 +57,7 @@ SimpleGL.prototype.loadFiles = function(urls) {
                     }
                 }
             } else {
-                ecb(error.currentTarget.responseURL);
+                ecb(e.currentTarget.responseURL);
             }
         };
     }

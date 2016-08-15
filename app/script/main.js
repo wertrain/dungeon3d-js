@@ -3,7 +3,9 @@
 {
     let sgl = new SimpleGL();
     sgl.initalize('canvas', 640, 480);
-    sgl.loadFiles(['shader/vertex.vs', 'shader/fragment.fs']).then(responses => {
+    let files = new Array();
+    Array.prototype.push.apply(files, dungeon3d.MapRenderer.getNeedResouces());
+    sgl.loadFiles(files).then(responses => {
         let gl = sgl.getGL();
         let vs = sgl.compileShader(0, responses[0]);
         let fs = sgl.compileShader(1, responses[1]);
