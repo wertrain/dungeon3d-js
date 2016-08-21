@@ -12,7 +12,7 @@
         mapRenderer.initalize(map, sgl, responses[0]);
         let camera = new dungeon3d.PerspectiveCamera();
         let config = dungeon3d.PerspectiveCamera.getConfig();
-        config.position = [0.0, 10.0, 0.0];
+        config.position = [0.0, 5.0, 0.0];
         config.target = [10, 0, 10];
         camera.initalize(config);
 
@@ -21,14 +21,15 @@
         gl.depthFunc(gl.LEQUAL);
         gl.frontFace(gl.CCW);
         gl.cullFace(gl.BACK);
-
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clearDepth(1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         camera.update();
-        mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
-        gl.flush();
+        setInterval(function() {
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
+            gl.flush();
+        }, 32);
     })
     .catch((e) => {
         console.log('error: ' + e);

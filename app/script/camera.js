@@ -16,6 +16,7 @@
         this.view = null;
         this.projection = null;
     };
+    Object.setPrototypeOf(PerspectiveCamera.prototype, Camera.prototype);
     PerspectiveCamera.getConfig = function() {
         return {
             position: [0.0, 0.0, 0.0],
@@ -27,7 +28,6 @@
             aspect: 640 / 480
         };
     };
-    Object.setPrototypeOf(PerspectiveCamera.prototype, Camera.prototype);
     PerspectiveCamera.prototype.initalize = function(config) {
         this.position = config.position;
         this.target = config.target;
