@@ -534,15 +534,11 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    MapRenderer.prototype.render = function(gl) {
-        var m = new matIV();
-        var mMatrix = m.identity(m.create());
-        var vMatrix = m.identity(m.create());
-        var pMatrix = m.identity(m.create());
-        var mvpMatrix = m.identity(m.create());
-        m.lookAt([0.0, 10.0, 0.0], [10, 0, 10], [0, 1, 0], vMatrix);
-        m.perspective(45, 640 / 480, 0.001, 1000, pMatrix);
-        m.multiply(pMatrix, vMatrix, mvpMatrix);
+    MapRenderer.prototype.render = function(gl, view, projection) {
+        let m = new matIV();
+        let mMatrix = m.identity(m.create());
+        let mvpMatrix = m.identity(m.create());
+        m.multiply(projection, view, mvpMatrix);
         m.multiply(mvpMatrix, mMatrix, mvpMatrix);
         gl.useProgram(this.program);
 
