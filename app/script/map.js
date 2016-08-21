@@ -18,7 +18,7 @@
     
     /** 四角形の配置管理 */
     let RectManager = function() {
-        this.rect = null; // Array2d型 に 頂点情報が配列 [位置x, 位置y, 位置z, 法線x, 法線y, 法線z, テクスチャUV, テクスチャUV]
+        this.rect = null; // Array2d型に配列で4頂点分格納される [位置x, 位置y, 位置z, 法線x, 法線y, 法線z, テクスチャUV, テクスチャUV] * 4つ
         this.rectOrder = null;
         this.vertexArray = null;
         this.wall = null;
