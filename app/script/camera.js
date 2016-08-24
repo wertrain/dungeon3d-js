@@ -9,6 +9,27 @@
         this.near = 0;
         this.far = 0;
     };
+    Camera.prototype.getViewRotation = function() {
+        let v = [ // this.position - this.target
+            this.position[0] - this.target[0], 
+            this.position[1] - this.target[1],
+            this.position[2] - this.target[2]
+        ];
+        let yaw = 0;
+        if (v[0] >= 0.0) {
+            yaw = -Math.atan(v[2] / v[0]) - Math.PI / 2;
+        } else {
+            yaw = -Math.atan(v[2] / v[0]) + Math.PI / 2;
+        }
+        let dist = Math.sqrt(v[2] * v[2] + v[0] * v[0]);
+        let pitch = 0;
+        if (v[1] >= 0.0) {
+            pitch = -Math.atan(dist / v[1]) + Math.PI / 2;
+        } else {
+            pitch = -Math.atan(dist / v[1]) - Math.PI / 2;
+        }
+        return { yaw: yaw, pitch: pitch };
+    };
     /** 透視投影カメラ */
     let PerspectiveCamera = function() {
         this.fovy = 0;
