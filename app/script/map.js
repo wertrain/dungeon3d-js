@@ -466,12 +466,12 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
-    MapRenderer.prototype.initalize = function(map, sgl, responses) {
+    MapRenderer.prototype.initalize = function(map, sgl, resouces) {
         let gl = sgl.getGL();
-        let vs = sgl.compileShader(0, responses[0]);
-        let fs = sgl.compileShader(1, responses[1]);
-        let wtex = sgl.createTexture(responses[2]);
-        let ftex = sgl.createTexture(responses[3]);
+        let vs = sgl.compileShader(0, resouces[0]);
+        let fs = sgl.compileShader(1, resouces[1]);
+        let wtex = sgl.createTexture(resouces[2]);
+        let ftex = sgl.createTexture(resouces[3]);
 
         this.program = sgl.linkProgram(vs, fs);
         gl.useProgram(this.program);

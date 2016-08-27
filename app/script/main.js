@@ -5,6 +5,7 @@
     sgl.initalize('canvas', 640, 480);
     let files = new Array();
     files[0] = dungeon3d.MapRenderer.getNeedResouces();
+    files[1] = dungeon3d.CharaRenderer.getNeedResouces();
     sgl.loadFiles(files).then(responses => {
         let map = new dungeon3d.Map();
         let mapRenderer = new dungeon3d.MapRenderer();
@@ -15,6 +16,10 @@
         config.position = [0.0, 5.0, 0.0];
         config.target = [10, 0, 10];
         camera.initalize(config);
+
+        let charaManager = new dungeon3d.CharaManager();
+        let charaRenderer = new dungeon3d.CharaRenderer();
+        charaRenderer.initalize(charaManager, responses[1]);
 
         let gl = sgl.getGL();
         gl.enable(gl.DEPTH_TEST);
