@@ -19,7 +19,7 @@
 
         let charaManager = new dungeon3d.CharaManager();
         let charaRenderer = new dungeon3d.CharaRenderer();
-        charaRenderer.initalize(charaManager, responses[1]);
+        charaRenderer.initalize(charaManager, sgl, responses[1]);
 
         let gl = sgl.getGL();
         gl.enable(gl.DEPTH_TEST);
