@@ -18,6 +18,7 @@
         camera.initalize(config);
 
         let charaManager = new dungeon3d.CharaManager();
+        charaManager.putChara(47, 39, 0, 0);
         let charaRenderer = new dungeon3d.CharaRenderer();
         charaRenderer.initalize(charaManager, sgl, responses[1]);
 
@@ -33,6 +34,7 @@
         setInterval(function() {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
+            charaRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
             gl.flush();
         }, 32);
     })
