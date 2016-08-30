@@ -93,12 +93,12 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    CharaRenderer.prototype.render = function(gl, view, projection) {
+    CharaRenderer.prototype.render = function(gl, camera) {
         let m = new matIV();
         let mMatrix = m.identity(m.create());
         m.translate(mMatrix, [0, 1.5, 0], mMatrix);
         let mvpMatrix = m.identity(m.create());
-        m.multiply(projection, view, mvpMatrix);
+        m.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
         m.multiply(mvpMatrix, mMatrix, mvpMatrix);
         gl.useProgram(this.program);
 
