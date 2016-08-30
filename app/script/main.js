@@ -31,7 +31,7 @@
         gl.clearDepth(1.0);
 
         camera.update();
-        setInterval(function() {
+        setInterval(() => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
             charaRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
