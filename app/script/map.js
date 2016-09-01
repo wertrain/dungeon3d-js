@@ -456,6 +456,9 @@
     Map.prototype.getHeight = function() {
         return this.height;
     };
+    Map.prototype.getY = function(x, y) {
+        return this.map[y][x];
+    };
 
     /** マップ描画 */
     let MapRenderer = function() {
