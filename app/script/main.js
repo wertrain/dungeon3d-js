@@ -13,7 +13,7 @@
         mapRenderer.initalize(map, sgl, responses[0]);
         let camera = new dungeon3d.PerspectiveCamera();
         let config = dungeon3d.PerspectiveCamera.getConfig();
-        config.position = [0.0, 5.0, 0.0];
+        config.position = [0.0, 20.0, 0.0];
         config.target = [10, 0, 10];
         camera.initalize(config);
 

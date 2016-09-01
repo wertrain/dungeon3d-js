@@ -55,13 +55,18 @@
         this.textureArray['player_move'] = ptex; 
         
         this.charaManager = charaManager;
-        let charaV = [[-0.5, 0.0, -0.5], [-0.5, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.0, -0.5]];
+        let charaV = [[-10.5, 0.0, -10.5], [-10.5, 0.0, 10.5], [10.5, 0.0, 10.5], [10.5, 0.0, -10.5]];
         //let charaV = [[-100.5, 0.0, -100.5], [-100.5, 0.0, 100.5], [100.5, 0.0, 100.5], [100.5, 0.0, -100.5]];
-        let charaUV = [[0, 0], [0, 1], [1, 1], [1, 0]];
+        //let charaUV = [[0, 0], [0, 1], [1, 1], [1, 0]];
         
         let charaArray = this.charaManager.getCharaArray();
         let vboArray = [], tboArray = [], textureIndexArray = [];
         for (let i = 0; i < charaArray.length; ++i) {
+            let u1 = (charaArray[i].pose * 48.0) / 512.0;
+            let u2 = (charaArray[i].pose * 48.0 + 48.0) / 512.0;
+            let v1 = (charaArray[i].direction * 96.0) / 512.0;
+            let v2 = (charaArray[i].direction * 96.0 + 96.0) / 512.0;
+            let charaUV = [[u1, v1], [u1, v2], [u2, v2], [u2, v1]];
             let vertices = [], uvs = [];
             for (let i = 0; i < 4; ++i) {
                 Array.prototype.push.apply(vertices, charaV[i]);
@@ -93,10 +98,15 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
+    let test = 0;
     CharaRenderer.prototype.render = function(gl, camera) {
         let m = new matIV();
         let mMatrix = m.identity(m.create());
-        m.translate(mMatrix, [0, 1.5, 0], mMatrix);
+        let mTrans = m.identity(m.create());
+        let mRot = m.identity(m.create());
+        m.translate(mTrans, [0, 15.0, 0], mTrans);
+        m.rotate(mRot, Math.PI / 2, [1.0, 0.0, 0.0], mRot);
+        m.multiply(mRot, mTrans, mMatrix);
         let mvpMatrix = m.identity(m.create());
         m.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
         m.multiply(mvpMatrix, mMatrix, mvpMatrix);
