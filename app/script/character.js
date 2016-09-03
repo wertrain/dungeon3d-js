@@ -101,7 +101,6 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    let test = 0;
     CharaRenderer.prototype.render = function(gl, camera) {
         let m = new matIV();
 
