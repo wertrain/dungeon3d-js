@@ -61,8 +61,7 @@
         let charaV = [[-0.5, 0.0, -0.5], [-0.5, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.0, -0.5]];
         //let charaV = [[-4.5, 0.0, -4.5], [-4.5, 0.0, 4.5], [4.5, 0.0, 4.5], [4.5, 0.0, -4.5]];
         //let charaV = [[-100.5, 0.0, -100.5], [-100.5, 0.0, 100.5], [100.5, 0.0, 100.5], [100.5, 0.0, -100.5]];
-        //let charaUV = [[0, 0], [0, 1], [1, 1], [1, 0]];
-        
+
         let charaArray = this.charaManager.getCharaArray();
         let vboArray = [], tboArray = [];
         for (let i = 0; i < charaArray.length; ++i) {
