@@ -16,7 +16,6 @@
             yaw = -Math.atan(v[2] / v[0]) - Math.PI / 2;
         } else {
             yaw = -Math.atan(v[2] / v[0]) + Math.PI / 2;
-            
         }
         let dist = Math.sqrt(v[2] * v[2] + v[0] * v[0]);
         let pitch = 0;
@@ -43,7 +42,7 @@
         m.rotate(mRotX, rotX, [1.0, 0.0, 0.0], mRotX);
         m.rotate(mRotY, rotY, [0.0, 1.0, 0.0], mRotY);
         let mRot = m.identity(m.create());
-        m.multiply(mRotX, mRotY, mRot);
+        m.multiply(mRotY, mRotX, mRot);
         this.position = m.transformCoord(position, mRot);
         this.target = target;
         this.position[0] = this.position[0] + this.target[0];
