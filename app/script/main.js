@@ -28,6 +28,20 @@
         let cameraRotY = 0;
         let cameraZoom = 4.0;
 
+        $(window).on('mousewheel', function(event) {
+            if (event.deltaY < 0) {
+                cameraZoom += 0.25;
+                if (cameraZoom > 6.0) {
+                    cameraZoom = 6.0;
+                }
+            } else {
+                cameraZoom -= 0.25;
+                if (cameraZoom <= 2.5) {
+                    cameraZoom = 2.5;
+                }
+            }
+        });
+
         let gl = sgl.getGL();
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
