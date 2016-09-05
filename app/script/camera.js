@@ -16,6 +16,7 @@
             yaw = -Math.atan(v[2] / v[0]) - Math.PI / 2;
         } else {
             yaw = -Math.atan(v[2] / v[0]) + Math.PI / 2;
+            
         }
         let dist = Math.sqrt(v[2] * v[2] + v[0] * v[0]);
         let pitch = 0;

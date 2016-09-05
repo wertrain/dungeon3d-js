@@ -26,7 +26,7 @@
         
         let cameraRotX = Math.PI * 0.3;
         let cameraRotY = 0;
-        let cameraZoom = 8.0;
+        let cameraZoom = 4.0;
 
         let gl = sgl.getGL();
         gl.enable(gl.DEPTH_TEST);
@@ -40,10 +40,9 @@
         camera.update();
         setInterval(() => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            cameraRotY += 0.01;
             camera.setViewParams(cameraRotX, -cameraRotY, -cameraZoom, charaManager.getChara(0).position);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
-            charaRenderer.render(gl, camera);
+            charaRenderer.render(sgl, gl, camera);
             gl.flush();
         }, 32);
     })

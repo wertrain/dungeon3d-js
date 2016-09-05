@@ -58,10 +58,7 @@
         this.textureArray['player_move'] = ptex; 
         
         this.charaManager = charaManager;
-        let charaV = [[-0.5, 0.0, -0.5], [-0.5, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.0, -0.5]];
-        //let charaV = [[-4.5, 0.0, -4.5], [-4.5, 0.0, 4.5], [4.5, 0.0, 4.5], [4.5, 0.0, -4.5]];
-        //let charaV = [[-100.5, 0.0, -100.5], [-100.5, 0.0, 100.5], [100.5, 0.0, 100.5], [100.5, 0.0, -100.5]];
-
+        let charaV = [[-0.2, 0.6, -0.0], [-0.2, 0.0, 0.0], [0.2, 0.0, 0.0], [0.2, 0.6, -0.0]];
         let charaArray = this.charaManager.getCharaArray();
         let vboArray = [], tboArray = [];
         for (let i = 0; i < charaArray.length; ++i) {
@@ -100,15 +97,17 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    CharaRenderer.prototype.render = function(gl, camera) {
+    CharaRenderer.prototype.render = function(sgl, gl, camera) {
         let m = new matIV();
 
         let viewRot = camera.getViewRotation();
         let mRot = m.identity(m.create());
+        //m.rotate(mRot, Math.PI / 2, [1.0, 0.0, 0.0], mRot);
         m.rotate(mRot, viewRot.yaw, [0.0, 1.0, 0.0], mRot);
+        m.rotate(mRot, viewRot.pitch, [1.0, 0.0, 0.0], mRot);
         let mScale = m.identity(m.create());
         m.scale(mScale, [1.0, 1.0 / Math.cos(viewRot.pitch), 1.0], mScale);
-        m.multiply(mRot, mScale, mRot);
+        m.multiply(mScale, mRot, mRot);
 
         let v = camera.getViewDistance();
         let vx = 0.15 * v[0] / v[1];
@@ -128,8 +127,8 @@
                 vy + chara.position[1],
                 vz + chara.position[2],
             ], mTrans);
-            //m.rotate(mRot, 0.2, [0.0, 0.0, 0.0], mRot);
-            m.multiply(mRot, mTrans, mMatrix);
+            //m.rotate(mRot, 0.5, [0.0, 1.0, 0.0], mRot);
+            m.multiply(mTrans, mRot, mMatrix);
             let mvpMatrix = m.identity(m.create());
             m.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
             m.multiply(mvpMatrix, mMatrix, mvpMatrix);
@@ -152,6 +151,19 @@
     };
     CharaRenderer.getNeedResouces = function() {
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/player_move.png'];
+    };
+    CharaRenderer.vec3project = function(vec, proj, view, world) {
+        let m = new matIV();
+        let m1 = m.identity(m.create());
+        let m2 = m.identity(m.create());
+        m.multiply(proj, view, m1);
+        m.multiply(m1, world, m2);
+        v = m.transformCoord(vec, m2);
+        let vpx = 0, vpy = 0, vpw = 640, vph = 480, minz = 0.0, maxz = 1.0;
+        let x = vpx + (1.0 + v[0]) * (vpw * 0.5);
+        let y = vpy + (1.0 - v[1]) * (vph * 0.5);
+        let z = minz + v[2] * (maxz - minz)
+        return [x, y, z];
     };
 
     if (typeof dungeon3d === 'undefined') {
