@@ -58,24 +58,30 @@
         this.textureArray['player_move'] = ptex; 
         
         this.charaManager = charaManager;
-        let charaV = [[-0.2, 0.6, -0.0], [-0.2, 0.0, 0.0], [0.2, 0.0, 0.0], [0.2, 0.6, -0.0]];
+        let charaV = [-0.2, 0.6, -0.0, -0.2, 0.0, 0.0, 0.2, 0.0, 0.0, 0.2, 0.6, -0.0];
         let charaArray = this.charaManager.getCharaArray();
-        let vboArray = [], tboArray = [];
+        let vboArray = [];
         for (let i = 0; i < charaArray.length; ++i) {
-            let u1 = (charaArray[i].pose * 48.0) / 512.0;
-            let u2 = (charaArray[i].pose * 48.0 + 48.0) / 512.0;
-            let v1 = (charaArray[i].direction * 96.0) / 512.0;
-            let v2 = (charaArray[i].direction * 96.0 + 96.0) / 512.0;
-            let charaUV = [[u1, v1], [u1, v2], [u2, v2], [u2, v1]];
-            let vertices = [], uvs = [];
-            for (let i = 0; i < 4; ++i) {
-                Array.prototype.push.apply(vertices, charaV[i]);
-                Array.prototype.push.apply(uvs, charaUV[i]);
-            }
-            let vbo = sgl.createVBO(vertices);
+            let vbo = sgl.createVBO(charaV);
             vboArray.push(vbo);
-            let tbo = sgl.createVBO(uvs);
-            tboArray.push(tbo);
+        }
+        // 姿勢とポーズごとに作成
+        const CHARA_DIR = 10, CHARA_POSE = 9;
+        let tboArray = [];
+        for (let i = 0; i < charaArray.length; ++i) {
+            let uvArray = new Array(CHARA_DIR);
+            for (let dir = 0; dir < CHARA_DIR; ++dir) {
+                uvArray[dir] = new Array(CHARA_POSE);
+                for (let pose = 0; pose < CHARA_POSE; ++pose) {
+                    let u1 = (pose * 48.0) / 512.0;
+                    let u2 = (pose * 48.0 + 48.0) / 512.0;
+                    let v1 = (dir * 96.0) / 512.0;
+                    let v2 = (dir * 96.0 + 96.0) / 512.0;
+                    let vbo = sgl.createVBO([u1, v1, u1, v2, u2, v2, u2, v1]);
+                    uvArray[dir][pose] = vbo;
+                }
+            }
+            tboArray.push(uvArray);
         }
         this.renderObject.vboArray = vboArray;
         this.renderObject.tboArray = tboArray;
@@ -97,7 +103,7 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    CharaRenderer.prototype.render = function(sgl, gl, camera) {
+    CharaRenderer.prototype.render = function(gl, camera) {
         let m = new matIV();
 
         let viewRot = camera.getViewRotation();
@@ -109,6 +115,8 @@
         m.scale(mScale, [1.0, 1.0 / Math.cos(viewRot.pitch), 1.0], mScale);
         m.multiply(mScale, mRot, mRot);
 
+        let dir = Math.floor(((Math.floor(viewRot.yaw * 8.0 / Math.PI) + 17) & 15) / 2);
+        
         let v = camera.getViewDistance();
         let vx = 0.15 * v[0] / v[1];
         let vz = 0.15 * v[2] / v[1];
@@ -120,6 +128,7 @@
         let textureNameArray = ['player_move'];
         for (let i = 0; i < this.renderObject.charaArray.length; ++i) {
             let chara = this.renderObject.charaArray[i];
+            let charDir = (chara.direction + dir) % 8;
             let mMatrix = m.identity(m.create());
             let mTrans = m.identity(m.create());
             m.translate(mTrans, [
@@ -127,7 +136,13 @@
                 vy + chara.position[1],
                 vz + chara.position[2],
             ], mTrans);
-            //m.rotate(mRot, 0.5, [0.0, 1.0, 0.0], mRot);
+            if (charDir > 4) {
+                charDir = 8 - charDir;
+            } else {
+                mRot = m.identity(m.create());
+                m.rotate(mRot, viewRot.yaw + (Math.PI), [0.0, 1.0, 0.0], mRot);
+                m.multiply(mScale, mRot, mRot);
+            }
             m.multiply(mTrans, mRot, mMatrix);
             let mvpMatrix = m.identity(m.create());
             m.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
@@ -136,7 +151,7 @@
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.textureArray[textureNameArray[chara.type]]);
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.tboArray[i]);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.tboArray[i][charDir][0]);
             gl.enableVertexAttribArray(this.attLocationArray['textureCoord']);
             gl.vertexAttribPointer(this.attLocationArray['textureCoord'], this.attStrideArray['textureCoord'], gl.FLOAT, false, 0, 0);
 

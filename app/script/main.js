@@ -28,20 +28,6 @@
         let cameraRotY = 0;
         let cameraZoom = 4.0;
 
-        $(window).on('mousewheel', function(event) {
-            if (event.deltaY < 0) {
-                cameraZoom += 0.25;
-                if (cameraZoom > 6.0) {
-                    cameraZoom = 6.0;
-                }
-            } else {
-                cameraZoom -= 0.25;
-                if (cameraZoom <= 2.5) {
-                    cameraZoom = 2.5;
-                }
-            }
-        });
-
         let gl = sgl.getGL();
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
@@ -59,6 +45,53 @@
             charaRenderer.render(gl, camera);
             gl.flush();
         }, 32);
+
+        //-----------------------------------------------------------
+        // マウスイベント
+        $(window).on('mousewheel', function(event) {
+            if (event.deltaY > 0) {
+                cameraZoom += 0.25;
+                if (cameraZoom > 6.0) {
+                    cameraZoom = 6.0;
+                }
+            } else {
+                cameraZoom -= 0.25;
+                if (cameraZoom <= 2.5) {
+                    cameraZoom = 2.5;
+                }
+            }
+        });
+        let cameraDrag = false;
+        let dragStartX = 0, dragStartY = 0;
+        $('canvas').on('mousedown', function(event) {
+            switch (event.which) {
+                case 3:
+                    cameraDrag = true;
+                    dragStartX = event.clientX;
+                    dragStartY = event.clientY;
+                    break;
+            }
+        });
+        $('canvas').on('mouseup', function(event) {
+            cameraDrag = false;
+        });
+        $('canvas').on('mousemove', function(event) {
+            if (cameraDrag) {
+                cameraRotY -= (event.clientX - dragStartX) * (Math.PI  * 0.002);
+                cameraRotX -= (event.clientY - dragStartY) * (Math.PI  * 0.0005);
+                if (cameraRotX < 0.3) {
+                    cameraRotX = 0.3;
+                } else if (cameraRotX > 0.8) {
+                    cameraRotX = 0.8;
+                }
+                dragStartX = event.clientX;
+                dragStartY = event.clientY;
+            }
+        });
+        // カメラ操作で使用するので、キャンバス上では右クリックメニューを表示しないようにする
+        $('canvas').on('contextmenu',function(e){
+            return false;
+        });
     })
     .catch((e) => {
         console.log('error: ' + e);
