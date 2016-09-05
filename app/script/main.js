@@ -48,7 +48,7 @@
 
         //-----------------------------------------------------------
         // マウスイベント
-        $(window).on('mousewheel', function(event) {
+        $(window).on('mousewheel', event => {
             if (event.deltaY > 0) {
                 cameraZoom += 0.25;
                 if (cameraZoom > 6.0) {
@@ -63,19 +63,19 @@
         });
         let cameraDrag = false;
         let dragStartX = 0, dragStartY = 0;
-        $('canvas').on('mousedown', function(event) {
+        $('canvas').on('mousedown', event => {
             switch (event.which) {
-                case 3:
+                case 3: // 右クリック
                     cameraDrag = true;
                     dragStartX = event.clientX;
                     dragStartY = event.clientY;
                     break;
             }
         });
-        $('canvas').on('mouseup', function(event) {
+        $('canvas').on('mouseup', event => {
             cameraDrag = false;
         });
-        $('canvas').on('mousemove', function(event) {
+        $('canvas').on('mousemove', event => {
             if (cameraDrag) {
                 cameraRotY -= (event.clientX - dragStartX) * (Math.PI  * 0.002);
                 cameraRotX -= (event.clientY - dragStartY) * (Math.PI  * 0.0005);
@@ -89,7 +89,7 @@
             }
         });
         // カメラ操作で使用するので、キャンバス上では右クリックメニューを表示しないようにする
-        $('canvas').on('contextmenu',function(e){
+        $('canvas').on('contextmenu', event => {
             return false;
         });
     })
