@@ -14,7 +14,8 @@
         "dungeon3d": true,
         "SimpleGL": true,
         "exports": true,
-        "matIV": true
+        "matIV": true,
+        "$": true
     },
     "rules": {
         "no-console": 0

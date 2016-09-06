@@ -173,7 +173,7 @@
         let m2 = m.identity(m.create());
         m.multiply(proj, view, m1);
         m.multiply(m1, world, m2);
-        v = m.transformCoord(vec, m2);
+        let v = m.transformCoord(vec, m2);
         let vpx = 0, vpy = 0, vpw = 640, vph = 480, minz = 0.0, maxz = 1.0;
         let x = vpx + (1.0 + v[0]) * (vpw * 0.5);
         let y = vpy + (1.0 - v[1]) * (vph * 0.5);

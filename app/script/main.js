@@ -73,6 +73,7 @@
             }
         });
         $('canvas').on('mouseup', event => {
+            event;
             cameraDrag = false;
         });
         $('canvas').on('mousemove', event => {
@@ -90,6 +91,7 @@
         });
         // カメラ操作で使用するので、キャンバス上では右クリックメニューを表示しないようにする
         $('canvas').on('contextmenu', event => {
+            event; // unused-varsへの対処
             return false;
         });
     })
