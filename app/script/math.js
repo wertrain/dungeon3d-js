@@ -104,7 +104,7 @@ Vector3.clone = function(vec, dest) {
 
 // ------------------------------------------------------------------------------------------------
 // Matrix44
-// based on minMatrix.js https://wgld.org/j/minMatrix.js
+// based on minMatrix.js (https://wgld.org/j/minMatrix.js)
 // ------------------------------------------------------------------------------------------------
 var Matrix44 = function() {
 };
