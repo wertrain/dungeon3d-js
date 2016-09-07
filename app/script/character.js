@@ -104,16 +104,14 @@
         this.attStrideArray['normal'] = 3;
     };
     CharaRenderer.prototype.render = function(gl, camera) {
-        let m = new matIV();
-
         let viewRot = camera.getViewRotation();
-        let mRot = m.identity(m.create());
-        //m.rotate(mRot, Math.PI / 2, [1.0, 0.0, 0.0], mRot);
-        m.rotate(mRot, viewRot.yaw, [0.0, 1.0, 0.0], mRot);
-        m.rotate(mRot, viewRot.pitch, [1.0, 0.0, 0.0], mRot);
-        let mScale = m.identity(m.create());
-        m.scale(mScale, [1.0, 1.0 / Math.cos(viewRot.pitch), 1.0], mScale);
-        m.multiply(mScale, mRot, mRot);
+        let mRot = Matrix44.createIdentity();
+        //Matrix44.rotate(mRot, Math.PI / 2, [1.0, 0.0, 0.0], mRot);
+        Matrix44.rotate(mRot, viewRot.yaw, [0.0, 1.0, 0.0], mRot);
+        Matrix44.rotate(mRot, viewRot.pitch, [1.0, 0.0, 0.0], mRot);
+        let mScale = Matrix44.createIdentity();
+        Matrix44.scale(mScale, [1.0, 1.0 / Math.cos(viewRot.pitch), 1.0], mScale);
+        Matrix44.multiply(mScale, mRot, mRot);
 
         let dir = Math.floor(((Math.floor(viewRot.yaw * 8.0 / Math.PI) + 17) & 15) / 2);
         
@@ -129,9 +127,9 @@
         for (let i = 0; i < this.renderObject.charaArray.length; ++i) {
             let chara = this.renderObject.charaArray[i];
             let charDir = (chara.direction + dir) % 8;
-            let mMatrix = m.identity(m.create());
-            let mTrans = m.identity(m.create());
-            m.translate(mTrans, [
+            let mMatrix = Matrix44.createIdentity();
+            let mTrans = Matrix44.createIdentity();
+            Matrix44.translate(mTrans, [
                 vx + chara.position[0],
                 vy + chara.position[1],
                 vz + chara.position[2],
@@ -139,14 +137,14 @@
             if (charDir > 4) {
                 charDir = 8 - charDir;
             } else {
-                mRot = m.identity(m.create());
-                m.rotate(mRot, viewRot.yaw + (Math.PI), [0.0, 1.0, 0.0], mRot);
-                m.multiply(mScale, mRot, mRot);
+                mRot = Matrix44.createIdentity();
+                Matrix44.rotate(mRot, viewRot.yaw + (Math.PI), [0.0, 1.0, 0.0], mRot);
+                Matrix44.multiply(mScale, mRot, mRot);
             }
-            m.multiply(mTrans, mRot, mMatrix);
-            let mvpMatrix = m.identity(m.create());
-            m.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
-            m.multiply(mvpMatrix, mMatrix, mvpMatrix);
+            Matrix44.multiply(mTrans, mRot, mMatrix);
+            let mvpMatrix = Matrix44.createIdentity();
+            Matrix44.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
+            Matrix44.multiply(mvpMatrix, mMatrix, mvpMatrix);
             gl.uniformMatrix4fv(this.uniLocationArray['mvpMatrix'], false, mvpMatrix);
 
             gl.activeTexture(gl.TEXTURE0);
@@ -166,19 +164,6 @@
     };
     CharaRenderer.getNeedResouces = function() {
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/player_move.png'];
-    };
-    CharaRenderer.vec3project = function(vec, proj, view, world) {
-        let m = new matIV();
-        let m1 = m.identity(m.create());
-        let m2 = m.identity(m.create());
-        m.multiply(proj, view, m1);
-        m.multiply(m1, world, m2);
-        let v = m.transformCoord(vec, m2);
-        let vpx = 0, vpy = 0, vpw = 640, vph = 480, minz = 0.0, maxz = 1.0;
-        let x = vpx + (1.0 + v[0]) * (vpw * 0.5);
-        let y = vpy + (1.0 - v[1]) * (vph * 0.5);
-        let z = minz + v[2] * (maxz - minz)
-        return [x, y, z];
     };
 
     if (typeof dungeon3d === 'undefined') {

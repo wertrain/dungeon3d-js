@@ -538,11 +538,10 @@
         this.attStrideArray['normal'] = 3;
     };
     MapRenderer.prototype.render = function(gl, view, projection) {
-        let m = new matIV();
-        let mMatrix = m.identity(m.create());
-        let mvpMatrix = m.identity(m.create());
-        m.multiply(projection, view, mvpMatrix);
-        m.multiply(mvpMatrix, mMatrix, mvpMatrix);
+        let mMatrix = Matrix44.createIdentity();
+        let mvpMatrix = Matrix44.createIdentity();
+        Matrix44.multiply(projection, view, mvpMatrix);
+        Matrix44.multiply(mvpMatrix, mMatrix, mvpMatrix);
         gl.useProgram(this.program);
 
         gl.uniformMatrix4fv(this.uniLocationArray['mvpMatrix'], false, mvpMatrix);

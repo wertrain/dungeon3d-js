@@ -36,20 +36,19 @@
     };
     Camera.prototype.setViewParams = function(rotX, rotY, dist, target) {
         let position = [0.0, 0.0, dist];
-        var m = new matIV();
-        let mRotX = m.identity(m.create());
-        let mRotY = m.identity(m.create());
-        m.rotate(mRotX, rotX, [1.0, 0.0, 0.0], mRotX);
-        m.rotate(mRotY, rotY, [0.0, 1.0, 0.0], mRotY);
-        let mRot = m.identity(m.create());
-        m.multiply(mRotY, mRotX, mRot);
-        this.position = m.transformCoord(position, mRot);
+        let mRotX = Matrix44.createIdentity();
+        let mRotY = Matrix44.createIdentity();
+        Matrix44.rotate(mRotX, rotX, [1.0, 0.0, 0.0], mRotX);
+        Matrix44.rotate(mRotY, rotY, [0.0, 1.0, 0.0], mRotY);
+        let mRot = Matrix44.createIdentity();
+        Matrix44.multiply(mRotY, mRotX, mRot);
+        MathUtil.transformCoord(position, mRot, this.position);
         this.target = target;
         this.position[0] = this.position[0] + this.target[0];
         this.position[1] = this.position[1] + this.target[1];
         this.position[2] = this.position[2] + this.target[2];
-        this.view = m.identity(m.create());
-        m.lookAt(this.position, this.target, this.up, this.view);
+        this.view = Matrix44.createIdentity();
+        Matrix44.lookAt(this.position, this.target, this.up, this.view);
     };
     /** 透視投影カメラ */
     let PerspectiveCamera = function() {
@@ -80,11 +79,10 @@
         this.aspect = config.aspect;
     };
     PerspectiveCamera.prototype.update = function() {
-        var m = new matIV();
-        this.view = m.identity(m.create());
-        this.projection = m.identity(m.create());
-        m.lookAt(this.position, this.target, this.up, this.view);
-        m.perspective(this.fovy, this.aspect, this.near, this.far, this.projection);
+        this.view = Matrix44.createIdentity();
+        this.projection = Matrix44.createIdentity();
+        Matrix44.lookAt(this.position, this.target, this.up, this.view);
+        Matrix44.perspective(this.fovy, this.aspect, this.near, this.far, this.projection);
     };
     PerspectiveCamera.prototype.getViewMatrix = function() {
         return this.view;
