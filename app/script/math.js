@@ -101,6 +101,27 @@ Vector3.clone = function(vec, dest) {
     dest[2] = vec[2];
     return dest;
 };
+Vector3.fromAngles = function(theta, phi, dest) {
+    if (typeof dest === 'undefined') {
+        dest = this.create();
+    }
+    dest[0] = Math.cos(theta) * Math.cos(phi);
+    dest[1] = Math.sin(phi);
+    dest[2] = Math.sin(theta) * Math.cos(phi);
+    return dest;
+};
+Vector3.randomDirection = function() {
+    return this.fromAngles(Math.random() * Math.PI * 2, Math.asin(Math.random() * 2 - 1));
+};
+Vector3.lerp = function(vec1, b, fraction) {
+    let dest = this.create();
+    this.subtract(b, vec1, dest);
+    this.multiply(dest, fraction, dest);
+    return this.add(dest, vec1, dest);
+};
+Vector3.angleBetween = function(v1, v2) {
+    return this.angleTo(v1, v2);
+};
 
 // ------------------------------------------------------------------------------------------------
 // Matrix44
