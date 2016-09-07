@@ -110,13 +110,17 @@ var Matrix44 = function() {
 };
 Matrix44.create = function() {
     return new Float32Array(16);
-}
+};
 Matrix44.identity = function(dest) {
     dest[0]  = 1; dest[1]  = 0; dest[2]  = 0; dest[3]  = 0;
     dest[4]  = 0; dest[5]  = 1; dest[6]  = 0; dest[7]  = 0;
     dest[8]  = 0; dest[9]  = 0; dest[10] = 1; dest[11] = 0;
     dest[12] = 0; dest[13] = 0; dest[14] = 0; dest[15] = 1;
     return dest;
+};
+Matrix44.createIdentity = function() {
+    let mat = this.create();
+    return this.identity(mat);
 };
 Matrix44.multiply = function(mat1, mat2, dest) {
     let a = mat1[0],  b = mat1[1],  c = mat1[2],  d = mat1[3],
