@@ -71,8 +71,8 @@ Vector3.cross = function(v1, v2, dest) {
     dest[2] = v1[0] * v2[1] - v1[1] * v2[0];
     return dest;
 };
-Vector3.length = function(v1, v2) {
-    return Math.sqrt(v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]);
+Vector3.length = function(vec) {
+    return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
 };
 Vector3.unit = function(vec, dest) {
     return this.divide(vec, this.length(vec), dest);
@@ -113,9 +113,8 @@ Vector3.fromAngles = function(theta, phi, dest) {
 Vector3.randomDirection = function() {
     return this.fromAngles(Math.random() * Math.PI * 2, Math.asin(Math.random() * 2 - 1));
 };
-Vector3.lerp = function(vec1, b, fraction) {
-    let dest = this.create();
-    this.subtract(b, vec1, dest);
+Vector3.lerp = function(vec1, vec2, fraction, dest) {
+    this.subtract(vec2, vec1, dest);
     this.multiply(dest, fraction, dest);
     return this.add(dest, vec1, dest);
 };
