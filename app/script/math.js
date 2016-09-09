@@ -3,8 +3,12 @@
 // ------------------------------------------------------------------------------------------------
 var Vector3 = function() {
 };
-Vector3.create = function() {
-    return new Float32Array(3);
+Vector3.create = function(x, y, z) {
+    let vec = new Float32Array(3);
+    vec[0] = x || 0;
+    vec[1] = y || 0;
+    vec[2] = z || 0;
+    return vec;
 };
 Vector3.negative = function(vec, dest) {
     dest[0] = -vec[0];
@@ -76,6 +80,15 @@ Vector3.length = function(vec) {
 };
 Vector3.unit = function(vec, dest) {
     return this.divide(vec, this.length(vec), dest);
+};
+Vector3.normalize = function(vec, dest) {
+    let x = vec[0], y = vec[1], z = vec[2];
+    let length = this.length(vec);
+    let m = (length === 0 ? 1.0 : 1.0 / length);
+    dest[0] = x * m;
+    dest[1] = y * m;
+    dest[2] = z * m;
+    return dest;
 };
 Vector3.min = function(vec) {
     return Math.min(Math.min(vec[0], vec[1]), vec[2]);
