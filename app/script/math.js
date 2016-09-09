@@ -352,3 +352,134 @@ MathUtil.transformCoord = function(vec, mat, dest) {
     dest[2] = (mat[2] * x + mat[6] * y + mat[10] * z + mat[14]) / w;
     return dest;
 };
+MathUtil.project = function(pos, view, proj, viewport, dest) {
+    // Transformation vectors
+    let temp = new Array(8);
+    // Modelview transform
+    temp[0] = view[0] * pos[0] + view[4] * pos[1] + view[ 8] * pos[2] + view[12]; // w is always 1
+    temp[1] = view[1] * pos[0] + view[5] * pos[1] + view[ 9] * pos[2] + view[13];
+    temp[2] = view[2] * pos[0] + view[6] * pos[1] + view[10] * pos[2] + view[14];
+    temp[3] = view[3] * pos[0] + view[7] * pos[1] + view[11] * pos[2] + view[15];
+    // Projection transform, the final row of projection matrix is always [0 0 -1 0]
+    // so we optimize for that.
+    temp[4] = proj[0] * temp[0] + proj[4] * temp[1] + proj[ 8] * temp[2] + proj[12] * temp[3];
+    temp[5] = proj[1] * temp[0] + proj[5] * temp[1] + proj[ 9] * temp[2] + proj[13] * temp[3];
+    temp[6] = proj[2] * temp[0] + proj[6] * temp[1] + proj[10] * temp[2] + proj[14] * temp[3];
+    temp[7] = -temp[2];
+    // The result normalizes between -1 and 1
+    if (temp[7] === 0.0) { // The w value
+        return 0;
+    }
+    temp[7] = 1.0 / temp[7];
+    // Perspective division
+    temp[4] *= temp[7];
+    temp[5] *= temp[7];
+    temp[6] *= temp[7];
+    // Window coordinates
+    // Map x, y to range 0-1
+    dest[0] = (temp[4] * 0.5 + 0.5) * viewport[2] + viewport[0];
+    dest[1] = (temp[5] * 0.5 + 0.5) * viewport[3] + viewport[1];
+    // This is only correct when glDepthRange(0.0, 1.0)
+    dest[2] = (1.0 + temp[6]) * 0.5; // Between 0 and 1
+    return 1;
+};
+MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
+    // Transformation matrices
+    let m = Matrix44.createIdentity(), A = Matrix44.createIdentity();
+    let inArray = new Array(4), outArray = new Array(4);
+    // Calculation for inverting a matrix, compute projection x modelview
+    // and store in A[16]
+    this._multiplyMatrices4by4(A, proj, view);
+    // Now compute the inverse of matrix A
+    Matrix44.inverse(A, m);
+    //Transformation of normalized coordinates between -1 and 1
+    inArray[0] = (winpos[0] - viewport[0]) / viewport[2] * 2.0 - 1.0;
+    inArray[1] = (winpos[1] - viewport[1]) / viewport[3] * 2.0 - 1.0;
+    inArray[2] = 2.0 * winpos[2] - 1.0;
+    inArray[3] = 1.0;
+    //Objects coordinates
+    this._multiplyMatrixByVector4by4(outArray, m, inArray);
+    if(outArray[3] === 0.0) {
+        return 0;
+    }
+    outArray[3] = 1.0 / outArray[3];
+    dest[0]= outArray[0] * outArray[3];
+    dest[1]= outArray[1] * outArray[3];
+    dest[2]= outArray[2] * outArray[3];
+};
+MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {
+    result[0]=matrix1[0]*matrix2[0]+
+      matrix1[4]*matrix2[1]+
+      matrix1[8]*matrix2[2]+
+      matrix1[12]*matrix2[3];
+    result[4]=matrix1[0]*matrix2[4]+
+      matrix1[4]*matrix2[5]+
+      matrix1[8]*matrix2[6]+
+      matrix1[12]*matrix2[7];
+    result[8]=matrix1[0]*matrix2[8]+
+      matrix1[4]*matrix2[9]+
+      matrix1[8]*matrix2[10]+
+      matrix1[12]*matrix2[11];
+    result[12]=matrix1[0]*matrix2[12]+
+      matrix1[4]*matrix2[13]+
+      matrix1[8]*matrix2[14]+
+      matrix1[12]*matrix2[15];
+    result[1]=matrix1[1]*matrix2[0]+
+      matrix1[5]*matrix2[1]+
+      matrix1[9]*matrix2[2]+
+      matrix1[13]*matrix2[3];
+    result[5]=matrix1[1]*matrix2[4]+
+      matrix1[5]*matrix2[5]+
+      matrix1[9]*matrix2[6]+
+      matrix1[13]*matrix2[7];
+    result[9]=matrix1[1]*matrix2[8]+
+      matrix1[5]*matrix2[9]+
+      matrix1[9]*matrix2[10]+
+      matrix1[13]*matrix2[11];
+    result[13]=matrix1[1]*matrix2[12]+
+      matrix1[5]*matrix2[13]+
+      matrix1[9]*matrix2[14]+
+      matrix1[13]*matrix2[15];
+    result[2]=matrix1[2]*matrix2[0]+
+      matrix1[6]*matrix2[1]+
+      matrix1[10]*matrix2[2]+
+      matrix1[14]*matrix2[3];
+    result[6]=matrix1[2]*matrix2[4]+
+      matrix1[6]*matrix2[5]+
+      matrix1[10]*matrix2[6]+
+      matrix1[14]*matrix2[7];
+    result[10]=matrix1[2]*matrix2[8]+
+      matrix1[6]*matrix2[9]+
+      matrix1[10]*matrix2[10]+
+      matrix1[14]*matrix2[11];
+    result[14]=matrix1[2]*matrix2[12]+
+      matrix1[6]*matrix2[13]+
+      matrix1[10]*matrix2[14]+
+      matrix1[14]*matrix2[15];
+    result[3]=matrix1[3]*matrix2[0]+
+      matrix1[7]*matrix2[1]+
+      matrix1[11]*matrix2[2]+
+      matrix1[15]*matrix2[3];
+    result[7]=matrix1[3]*matrix2[4]+
+      matrix1[7]*matrix2[5]+
+      matrix1[11]*matrix2[6]+
+      matrix1[15]*matrix2[7];
+    result[11]=matrix1[3]*matrix2[8]+
+      matrix1[7]*matrix2[9]+
+      matrix1[11]*matrix2[10]+
+      matrix1[15]*matrix2[11];
+    result[15]=matrix1[3]*matrix2[12]+
+      matrix1[7]*matrix2[13]+
+      matrix1[11]*matrix2[14]+
+      matrix1[15]*matrix2[15];
+    return result;
+};
+MathUtil._multiplyMatrixByVector4by4(resultvector, matrix, pvector)
+{
+    resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
+    resultvector[1]=matrix[1]*pvector[0]+matrix[5]*pvector[1]+matrix[9]*pvector[2]+matrix[13]*pvector[3];
+    resultvector[2]=matrix[2]*pvector[0]+matrix[6]*pvector[1]+matrix[10]*pvector[2]+matrix[14]*pvector[3];
+    resultvector[3]=matrix[3]*pvector[0]+matrix[7]*pvector[1]+matrix[11]*pvector[2]+matrix[15]*pvector[3];
+    return resultvector;
+}
+
