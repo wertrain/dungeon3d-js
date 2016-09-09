@@ -75,16 +75,19 @@ Vector3.cross = function(v1, v2, dest) {
     dest[2] = v1[0] * v2[1] - v1[1] * v2[0];
     return dest;
 };
-Vector3.length = function(vec) {
+var Vector3Length = function (vec) {
     return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
 };
+Vector3.size = function(vec) { // length
+    return Vector3Length(vec);
+};
 Vector3.unit = function(vec, dest) {
-    return this.divide(vec, this.length(vec), dest);
+    return this.divide(vec, Vector3Length(vec), dest);
 };
 Vector3.normalize = function(vec, dest) {
     let x = vec[0], y = vec[1], z = vec[2];
-    let length = this.length(vec);
-    let m = (length === 0 ? 1.0 : 1.0 / length);
+    let len = Vector3Length(vec);
+    let m = (len === 0 ? 1.0 : 1.0 / len);
     dest[0] = x * m;
     dest[1] = y * m;
     dest[2] = z * m;
@@ -99,11 +102,11 @@ Vector3.max = function(vec) {
 Vector3.toAngle = function(vec) {
     return {
         theta: Math.atan2(vec[2], vec[0]),
-        phi: Math.asin(vec[1] / this.length(vec))
+        phi: Math.asin(vec[1] / Vector3Length(vec))
     };
 };
 Vector3.angleTo = function(vec, a) {
-    return Math.acos(this.dot(a) / (this.length(vec) * this.length(a)));
+    return Math.acos(this.dot(a) / (Vector3Length(vec) * Vector3Length(a)));
 };
 Vector3.clone = function(vec, dest) {
     if (typeof dest === 'undefined') {
