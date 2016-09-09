@@ -17,7 +17,7 @@ Vector3.negative = function(vec, dest) {
     return dest;
 };
 Vector3.add = function(v1, v2, dest) {
-    if (Array.isArray(v2)) {
+    if (typeof (v2) === 'object') {
         dest[0] = v1[0] + v2[0];
         dest[1] = v1[1] + v2[1];
         dest[2] = v1[2] + v2[2];
@@ -29,7 +29,7 @@ Vector3.add = function(v1, v2, dest) {
     return dest;
 };
 Vector3.subtract = function(v1, v2, dest) {
-    if (Array.isArray(v2)) {
+    if (typeof (v2) === 'object') {
         dest[0] = v1[0] - v2[0];
         dest[1] = v1[1] - v2[1];
         dest[2] = v1[2] - v2[2];
@@ -40,7 +40,7 @@ Vector3.subtract = function(v1, v2, dest) {
     }
 };
 Vector3.multiply = function(v1, v2, dest) {
-    if (Array.isArray(v2)) {
+    if (typeof (v2) === 'object') {
         dest[0] = v1[0] * v2[0];
         dest[1] = v1[1] * v2[1];
         dest[2] = v1[2] * v2[2];
@@ -52,7 +52,7 @@ Vector3.multiply = function(v1, v2, dest) {
     return dest;
 };
 Vector3.divide = function(v1, v2, dest) {
-    if (Array.isArray(v2)) {
+    if (typeof (v2) === 'object') {
         dest[0] = v1[0] / v2[0];
         dest[1] = v1[1] / v2[1];
         dest[2] = v1[2] / v2[2];
@@ -136,6 +136,9 @@ Vector3.lerp = function(vec1, vec2, fraction, dest) {
 };
 Vector3.angleBetween = function(v1, v2) {
     return this.angleTo(v1, v2);
+};
+Vector3.innerProduct = function(vec, x, y, z) {
+    return vec[0] * x + vec[1] * y + vec[2] * z;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -368,14 +371,14 @@ MathUtil.transformCoord = function(vec, mat, dest) {
     dest[2] = (mat[2] * x + mat[6] * y + mat[10] * z + mat[14]) / w;
     return dest;
 };
-MathUtil.project = function(pos, view, proj, viewport, dest) {
+MathUtil.project = function(pos, mdlview, proj, viewport, dest) {
     // Transformation vectors
     let temp = new Array(8);
     // Modelview transform
-    temp[0] = view[0] * pos[0] + view[4] * pos[1] + view[ 8] * pos[2] + view[12]; // w is always 1
-    temp[1] = view[1] * pos[0] + view[5] * pos[1] + view[ 9] * pos[2] + view[13];
-    temp[2] = view[2] * pos[0] + view[6] * pos[1] + view[10] * pos[2] + view[14];
-    temp[3] = view[3] * pos[0] + view[7] * pos[1] + view[11] * pos[2] + view[15];
+    temp[0] = mdlview[0] * pos[0] + mdlview[4] * pos[1] + mdlview[ 8] * pos[2] + mdlview[12]; // w is always 1
+    temp[1] = mdlview[1] * pos[0] + mdlview[5] * pos[1] + mdlview[ 9] * pos[2] + mdlview[13];
+    temp[2] = mdlview[2] * pos[0] + mdlview[6] * pos[1] + mdlview[10] * pos[2] + mdlview[14];
+    temp[3] = mdlview[3] * pos[0] + mdlview[7] * pos[1] + mdlview[11] * pos[2] + mdlview[15];
     // Projection transform, the final row of projection matrix is always [0 0 -1 0]
     // so we optimize for that.
     temp[4] = proj[0] * temp[0] + proj[4] * temp[1] + proj[ 8] * temp[2] + proj[12] * temp[3];
@@ -399,13 +402,13 @@ MathUtil.project = function(pos, view, proj, viewport, dest) {
     dest[2] = (1.0 + temp[6]) * 0.5; // Between 0 and 1
     return 1;
 };
-MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
+MathUtil.unproject = function(winpos, mdlview, proj, viewport, dest) {
     // Transformation matrices
     let m = Matrix44.createIdentity(), A = Matrix44.createIdentity();
     let inArray = new Array(4), outArray = new Array(4);
     // Calculation for inverting a matrix, compute projection x modelview
     // and store in A[16]
-    this._multiplyMatrices4by4(A, proj, view);
+    this._multiplyMatrices4by4(A, proj, mdlview);
     // Now compute the inverse of matrix A
     Matrix44.inverse(A, m);
     //Transformation of normalized coordinates between -1 and 1
