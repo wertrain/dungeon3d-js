@@ -406,6 +406,7 @@ MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
     dest[0]= outArray[0] * outArray[3];
     dest[1]= outArray[1] * outArray[3];
     dest[2]= outArray[2] * outArray[3];
+    return 1;
 };
 MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {
     result[0]=matrix1[0]*matrix2[0]+
@@ -474,12 +475,10 @@ MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {
       matrix1[15]*matrix2[15];
     return result;
 };
-MathUtil._multiplyMatrixByVector4by4(resultvector, matrix, pvector)
-{
+MathUtil._multiplyMatrixByVector4by4 = function (resultvector, matrix, pvector) {
     resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
     resultvector[1]=matrix[1]*pvector[0]+matrix[5]*pvector[1]+matrix[9]*pvector[2]+matrix[13]*pvector[3];
     resultvector[2]=matrix[2]*pvector[0]+matrix[6]*pvector[1]+matrix[10]*pvector[2]+matrix[14]*pvector[3];
     resultvector[3]=matrix[3]*pvector[0]+matrix[7]*pvector[1]+matrix[11]*pvector[2]+matrix[15]*pvector[3];
     return resultvector;
-}
-
+};
