@@ -17,7 +17,7 @@
         config.position = [0.0, 20.0, 0.0];
         config.target = [10, 0, 10];
         camera.initalize(config);
-        
+
         let charaManager = new dungeon3d.CharaManager();
         charaManager.initalize(map, null);
         charaManager.putChara(10, 10, 0, 0);
@@ -29,6 +29,8 @@
         let cameraZoom = 4.0;
 
         let gl = sgl.getGL();
+        let viewport = gl.getParameter(gl.VIEWPORT);
+
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
         gl.frontFace(gl.CCW);
@@ -65,6 +67,23 @@
         let dragStartX = 0, dragStartY = 0;
         $('canvas').on('mousedown', event => {
             switch (event.which) {
+                case 1:
+                    let view = camera.getViewMatrix();
+                    let proj = camera.getProjectionMatrix();
+
+                    let mouseX = event.clientX;
+                    let mouseY = viewport[3] - event.clientY;
+                    let vecNear = Vector3.create(mouseX, mouseY, 0.0);
+                    let vecFar = Vector3.create(mouseX, mouseY, 1.0);
+                    MathUtil.unproject(vecNear, view, proj, viewport, vecNear);
+                    MathUtil.unproject(vecFar, view, proj, viewport, vecFar);
+                    let rayDir = Vector3.create();
+                    Vector3.subtract(vecFar, vecNear, rayDir);
+                    Vector3.normalize(rayDir, rayDir);
+
+                    let hit = map.intersectFloor(vecNear, rayDir);
+                    console.log(hit);
+                    break;
                 case 3: // 右クリック
                     cameraDrag = true;
                     dragStartX = event.clientX;

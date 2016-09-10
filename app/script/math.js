@@ -362,6 +362,31 @@ Matrix44.inverse = function(mat, dest) {
 // ------------------------------------------------------------------------------------------------
 var MathUtil = function() {
 };
+MathUtil.intersectTriangle = function(v0, v1, v2, ray, rayDir, out) {
+    let edge1 = Vector3.create(), edge2 = Vector3.create();
+    Vector3.subtract(v1, v0, edge1);
+    Vector3.subtract(v2, v0, edge2);
+    let pvec = Vector3.create();
+    Vector3.cross(rayDir, edge2, pvec);
+    let det = Vector3.dot(edge1, pvec);
+    if (det < Math.EPSILON) return null;
+    let tvec = Vector3.create();
+    Vector3.subtract(ray, v0, tvec);
+    let u = Vector3.dot(tvec, pvec);
+    if (u < 0 || u > det) return null;
+    let qvec = Vector3.create();
+    Vector3.cross(tvec, edge1, qvec);
+    let v = Vector3.dot(rayDir, qvec);
+    if (v < 0 || u + v > det) return null;
+    let t = Vector3.dot(edge2, qvec) / det;
+    if (typeof(out) === 'undefined') {
+        out = Vector3.create();
+    }
+    out[0] = ray[0] + t * rayDir[0];
+    out[1] = ray[1] + t * rayDir[1];
+    out[2] = ray[2] + t * rayDir[2];
+    return out;
+};
 MathUtil.transformCoord = function(vec, mat, dest) {
     let x = vec[0], y = vec[1], z = vec[2],
         w = mat[3] * x + mat[7] * y + mat[11] * z + mat[15];
@@ -422,9 +447,9 @@ MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
         return 0;
     }
     outArray[3] = 1.0 / outArray[3];
-    dest[0]= outArray[0] * outArray[3];
-    dest[1]= outArray[1] * outArray[3];
-    dest[2]= outArray[2] * outArray[3];
+    dest[0] = outArray[0] * outArray[3];
+    dest[1] = outArray[1] * outArray[3];
+    dest[2] = outArray[2] * outArray[3];
     return 1;
 };
 MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {

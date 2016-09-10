@@ -459,6 +459,36 @@
     Map.prototype.getY = function(x, y) {
         return this.map[y][x];
     };
+    Map.prototype.intersectFloor = function(ray, rayDir) {
+        let rect = this.rectManager.getRect();
+        let vertexArray = this.rectManager.getVertexArray();
+        let out = Vector3.create();
+        for (let y = 0; y < this.height; ++y) {
+            for (let x = 0; x < this.width; ++x) {
+                let vertices = [];
+                for (let i = 0; i < 4; ++i) {
+                    vertices.push(vertexArray[rect[y][x][i]].slice(0, 3));
+                }
+                // 床面以外は判定しない
+                if (vertices[0][1] !== 0) {
+                    continue;
+                }
+                let hit = MathUtil.intersectTriangle(
+                    vertices[0], vertices[1], vertices[2],
+                    ray, rayDir, out
+                ) || MathUtil.intersectTriangle(
+                    vertices[0], vertices[2], vertices[3],
+                    ray, rayDir, out
+                );
+                if (hit) {
+                    return {
+                        x: x, y: y, v: vertices
+                    };
+                }
+            }
+        }
+        return null;
+    };
 
     /** マップ描画 */
     let MapRenderer = function() {
