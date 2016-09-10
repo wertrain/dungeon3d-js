@@ -138,7 +138,8 @@
                 charDir = 8 - charDir;
             } else {
                 mRot = Matrix44.createIdentity();
-                Matrix44.rotate(mRot, viewRot.yaw + (Math.PI), [0.0, 1.0, 0.0], mRot);
+                Matrix44.rotate(mRot, viewRot.yaw + Math.PI, [0.0, 1.0, 0.0], mRot);
+                Matrix44.rotate(mRot, -viewRot.pitch, [1.0, 0.0, 0.0], mRot);
                 Matrix44.multiply(mScale, mRot, mRot);
             }
             Matrix44.multiply(mTrans, mRot, mMatrix);
