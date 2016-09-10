@@ -6,6 +6,7 @@
     let files = new Array();
     files[0] = dungeon3d.MapRenderer.getNeedResouces();
     files[1] = dungeon3d.CharaRenderer.getNeedResouces();
+    files[2] = dungeon3d.CursorRenderer.getNeedResouces();
     sgl.loadFiles(files).then(responses => {
         let map = new dungeon3d.Map();
         let mapRenderer = new dungeon3d.MapRenderer();
@@ -23,7 +24,11 @@
         charaManager.putChara(10, 10, 0, 0);
         let charaRenderer = new dungeon3d.CharaRenderer();
         charaRenderer.initalize(charaManager, sgl, responses[1]);
-        
+
+        let cursor = new dungeon3d.Cursor();
+        let cursorRenderer = new dungeon3d.CursorRenderer();
+        cursorRenderer.initalize(cursor, sgl, responses[2]);
+
         let cameraRotX = Math.PI * 0.3;
         let cameraRotY = 0;
         let cameraZoom = 4.0;
@@ -44,6 +49,7 @@
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             camera.setViewParams(cameraRotX, -cameraRotY, -cameraZoom, charaManager.getChara(0).position);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
+            cursorRenderer.render(gl, camera);
             charaRenderer.render(gl, camera);
             gl.flush();
         }, 32);
@@ -67,22 +73,7 @@
         let dragStartX = 0, dragStartY = 0;
         $('canvas').on('mousedown', event => {
             switch (event.which) {
-                case 1:
-                    let view = camera.getViewMatrix();
-                    let proj = camera.getProjectionMatrix();
-
-                    let mouseX = event.clientX;
-                    let mouseY = viewport[3] - event.clientY;
-                    let vecNear = Vector3.create(mouseX, mouseY, 0.0);
-                    let vecFar = Vector3.create(mouseX, mouseY, 1.0);
-                    MathUtil.unproject(vecNear, view, proj, viewport, vecNear);
-                    MathUtil.unproject(vecFar, view, proj, viewport, vecFar);
-                    let rayDir = Vector3.create();
-                    Vector3.subtract(vecFar, vecNear, rayDir);
-                    Vector3.normalize(rayDir, rayDir);
-
-                    let hit = map.intersectFloor(vecNear, rayDir);
-                    console.log(hit);
+                case 1: // 左クリック
                     break;
                 case 3: // 右クリック
                     cameraDrag = true;
@@ -106,6 +97,27 @@
                 }
                 dragStartX = event.clientX;
                 dragStartY = event.clientY;
+            } else {
+                // カーソルの移動
+                let view = camera.getViewMatrix();
+                let proj = camera.getProjectionMatrix();
+
+                let mouseX = event.clientX;
+                let mouseY = viewport[3] - event.clientY;
+                let vecNear = Vector3.create(mouseX, mouseY, 0.0);
+                let vecFar = Vector3.create(mouseX, mouseY, 1.0);
+                MathUtil.unproject(vecNear, view, proj, viewport, vecNear);
+                MathUtil.unproject(vecFar, view, proj, viewport, vecFar);
+                let rayDir = Vector3.create();
+                Vector3.subtract(vecFar, vecNear, rayDir);
+                Vector3.normalize(rayDir, rayDir);
+
+                let hit = map.intersectFloor(vecNear, rayDir);
+                if (hit) {
+                    cursor.put(hit.x, hit.y);
+                } else {
+                    cursor.hide();
+                }
             }
         });
         // カメラ操作で使用するので、キャンバス上では右クリックメニューを表示しないようにする
