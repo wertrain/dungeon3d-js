@@ -9,7 +9,7 @@
         this.footprint = null;
     };
     Footprint.prototype.initalize = function(start, maxdepth) {
-        this.start = start;
+        this.start = start; // [x, y]
         this.depth = maxdepth;
         this.width = maxdepth * 2 + 1;
         // 配列作成 & 0 初期化
@@ -18,6 +18,7 @@
                               .map(function () {return 0;});
     };
     Footprint.prototype.mark = function(pos, no) {
+        // pos === [x, y]
         let x = pos[0] - this.start[0] + this.depth;
         let y = pos[1] - this.start[1] + this.depth;
         this.footprint[y * this.width + x] = no;
