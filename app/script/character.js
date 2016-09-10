@@ -1,6 +1,33 @@
 'use strict';
 
 {
+    /** ルート探索用の足跡クラス */
+    let Footprint = function() {
+        this.start = null;
+        this.depth = 0;
+        this.width = 0;
+        this.footprint = null;
+    };
+    Footprint.prototype.initalize = function(start, maxdepth) {
+        this.start = start;
+        this.depth = maxdepth;
+        this.width = maxdepth * 2 + 1;
+        // 配列作成 & 0 初期化
+        // NOTE: この方法は速度的にどうか調べる
+        this.footprint = Array.apply(null, Array(this.width * this.width))
+                              .map(function () {return 0;});
+    };
+    Footprint.prototype.mark = function(pos, no) {
+        let x = pos[0] - this.start[0] + this.depth;
+        let y = pos[1] - this.start[1] + this.depth;
+        this.footprint[y * this.width + x] = no;
+    };
+    Footprint.prototype.isMove = function(pos, count) {
+        let x = pos[0] - this.start[0] + this.depth;
+        let y = pos[1] - this.start[1] + this.depth;
+        let mark = this.footprint[y * this.width + x];
+        return mark === 0 || mark === count;
+    };
     /** キャラクター */
     let CharaData = function() {
         this.x = 0; // 2D マップ上のX位置
@@ -170,6 +197,7 @@
     if (typeof dungeon3d === 'undefined') {
         exports.CharaRenderer = CharaRenderer;
         exports.CharaManager = CharaManager;
+        exports.Footprint = Footprint;
     } else {
         dungeon3d.CharaRenderer = CharaRenderer;
         dungeon3d.CharaManager = CharaManager;
