@@ -57,7 +57,7 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    CursorRenderer.prototype.render = function(gl, camera) {
+    CursorRenderer.prototype.render = function(gl, view, projection) {
         if (!this.cursor.visible) {
             return;
         }
@@ -70,7 +70,7 @@
         Matrix44.translate(mTrans, this.cursor.position, mTrans);
         Matrix44.multiply(mTrans, mMatrix, mMatrix);
         let mvpMatrix = Matrix44.createIdentity();
-        Matrix44.multiply(camera.getProjectionMatrix(), camera.getViewMatrix(), mvpMatrix);
+        Matrix44.multiply(projection, view, mvpMatrix);
         Matrix44.multiply(mvpMatrix, mMatrix, mvpMatrix);
         gl.uniformMatrix4fv(this.uniLocationArray['mvpMatrix'], false, mvpMatrix);
 

@@ -49,7 +49,7 @@
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             camera.setViewParams(cameraRotX, -cameraRotY, -cameraZoom, charaManager.getChara(0).position);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
-            cursorRenderer.render(gl, camera);
+            cursorRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
             charaRenderer.render(gl, camera);
             gl.flush();
         }, 32);
