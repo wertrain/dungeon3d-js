@@ -371,14 +371,14 @@ MathUtil.transformCoord = function(vec, mat, dest) {
     dest[2] = (mat[2] * x + mat[6] * y + mat[10] * z + mat[14]) / w;
     return dest;
 };
-MathUtil.project = function(pos, mdlview, proj, viewport, dest) {
+MathUtil.project = function(pos, view, proj, viewport, dest) {
     // Transformation vectors
     let temp = new Array(8);
     // Modelview transform
-    temp[0] = mdlview[0] * pos[0] + mdlview[4] * pos[1] + mdlview[ 8] * pos[2] + mdlview[12]; // w is always 1
-    temp[1] = mdlview[1] * pos[0] + mdlview[5] * pos[1] + mdlview[ 9] * pos[2] + mdlview[13];
-    temp[2] = mdlview[2] * pos[0] + mdlview[6] * pos[1] + mdlview[10] * pos[2] + mdlview[14];
-    temp[3] = mdlview[3] * pos[0] + mdlview[7] * pos[1] + mdlview[11] * pos[2] + mdlview[15];
+    temp[0] = view[0] * pos[0] + view[4] * pos[1] + view[ 8] * pos[2] + view[12]; // w is always 1
+    temp[1] = view[1] * pos[0] + view[5] * pos[1] + view[ 9] * pos[2] + view[13];
+    temp[2] = view[2] * pos[0] + view[6] * pos[1] + view[10] * pos[2] + view[14];
+    temp[3] = view[3] * pos[0] + view[7] * pos[1] + view[11] * pos[2] + view[15];
     // Projection transform, the final row of projection matrix is always [0 0 -1 0]
     // so we optimize for that.
     temp[4] = proj[0] * temp[0] + proj[4] * temp[1] + proj[ 8] * temp[2] + proj[12] * temp[3];
@@ -402,13 +402,13 @@ MathUtil.project = function(pos, mdlview, proj, viewport, dest) {
     dest[2] = (1.0 + temp[6]) * 0.5; // Between 0 and 1
     return 1;
 };
-MathUtil.unproject = function(winpos, mdlview, proj, viewport, dest) {
+MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
     // Transformation matrices
     let m = Matrix44.createIdentity(), A = Matrix44.createIdentity();
     let inArray = new Array(4), outArray = new Array(4);
     // Calculation for inverting a matrix, compute projection x modelview
     // and store in A[16]
-    this._multiplyMatrices4by4(A, proj, mdlview);
+    this._multiplyMatrices4by4(A, proj, view);
     // Now compute the inverse of matrix A
     Matrix44.inverse(A, m);
     //Transformation of normalized coordinates between -1 and 1
