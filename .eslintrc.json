@@ -14,7 +14,9 @@
         "dungeon3d": true,
         "SimpleGL": true,
         "exports": true,
-        "matIV": true,
+        "Matrix44": true,
+        "Vector3": true,
+        "MathUtil": true,
         "$": true
     },
     "rules": {

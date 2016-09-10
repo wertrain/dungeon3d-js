@@ -83,7 +83,7 @@
             }
         });
         $('canvas').on('mouseup', event => {
-            event;
+            event; // unused-varsへの対処
             cameraDrag = false;
         });
         $('canvas').on('mousemove', event => {
