@@ -61,7 +61,7 @@ SimpleGL.prototype.loadFile = function(url, data, successCallback, errorCallback
 };
 /** 
  * 複数のファイルを読み込む
- * @param {Array.<string>} urls 読み込み先 URL 配列
+ * @param {Array.<string|Array.<string>>} urls 読み込み先 URL 配列
  * @return {Promise} プロミスオブジェクト
  */
 SimpleGL.prototype.loadFiles = function(urls) {
