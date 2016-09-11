@@ -1,52 +1,10 @@
 'use strict';
 
 {
-    /** 
-     * ルート探索用の足跡クラス 
-     * @constructor 
-     */
-    let Footprint = function() {
-        this.start = null;
-        this.depth = 0;
-        this.width = 0;
-        this.footprint = null;
-    };
-    /** 
-     * 初期化
-     * @param {Array.<number>} start 探索開始位置 [x, y] 
-     * @param {number} maxdepth 最大深度
-     */
-    Footprint.prototype.initalize = function(start, maxdepth) {
-        this.start = start; // [x, y]
-        this.depth = maxdepth;
-        this.width = maxdepth * 2 + 1;
-        // 配列作成 & 0 初期化
-        // NOTE: この方法は速度的にどうか調べる
-        this.footprint = Array.apply(null, Array(this.width * this.width))
-                              .map(function () {return 0;});
-    };
-    /** 
-     * 探索済みの位置をマークする
-     * @param {Array.<number>} pos 探索位置 [x, y] 
-     * @param {number} no 設定する数値
-     */
-    Footprint.prototype.mark = function(pos, no) {
-        // pos === [x, y]
-        let x = pos[0] - this.start[0] + this.depth;
-        let y = pos[1] - this.start[1] + this.depth;
-        this.footprint[y * this.width + x] = no;
-    };
-    /** 
-     * 指定された位置に移動可能か判定する
-     * @param {Array.<number>} pos 探索位置 [x, y] 
-     * @param {number} count 設定する数値
-     * @return {boolean} 移動可能なら true
-     */
-    Footprint.prototype.isMove = function(pos, count) {
-        let x = pos[0] - this.start[0] + this.depth;
-        let y = pos[1] - this.start[1] + this.depth;
-        let mark = this.footprint[y * this.width + x];
-        return mark === 0 || mark === count;
+    /** @const */
+    let MOVE_STATE = {
+        STOP: 0,
+        MOVE: 1
     };
     /** 
      * キャラクター
@@ -59,6 +17,133 @@
         this.pose = 0; // 姿勢
         this.type = 0; // キャラタイプ
         this.position = []; // 3D 上の位置
+
+        this.prevX = 0; // 2D マップ上の以前のX位置
+        this.prevY = 0; // 2D マップ上の以前のY位置
+        this.moveQueue = []; // 移動先キュー
+        this.moveStartTime = 0; // 移動開始時間
+        this.moveGridStartTime = 0; // 移動開始時間（1マス）
+        this.moveState = MOVE_STATE.STOP; // キャラ状態
+    };
+    /** 
+     * 移動キューをクリアする
+     */
+    CharaData.prototype.clearMoveQueue = function() {
+        // 参照を切らさない方法2つ
+        // this.moveQueue.clear();
+        // this.moveQueue.length = 0;
+        // 今は参照が切れても問題ない
+        this.moveQueue = [];
+    };
+    /** 
+     * キューに移動先を追加
+     * @param {number} x 2Dマップ上の移動先X
+     * @param {number} y 2Dマップ上の移動先Y
+     */
+    CharaData.prototype.addMoveQueue = function(x, y) {
+        this.moveQueue.push({
+            x: x,
+            y: y
+        });
+    };
+    /** 
+     * 次の移動場所を求める
+     */
+    CharaData.prototype._getNextPos = function() {
+        if (this.moveQueue.length === 0) {
+            return false;
+        }
+        this.prevX = this.x;
+        this.prevY = this.y;
+
+        let pos = this.moveQueue.shift();
+        this.x = pos.x;
+        this.y = pos.y;
+        if (this.prevX === this.x) {
+            if (this.prevY < this.y) {
+                this.direction = 4;
+            } else {
+                this.direction = 0;
+            }
+        } else {
+            if (this.prevY < this.y) {
+                this.direction = 3;
+            } else if (this.prevY > this.y) {
+                this.direction = 1;
+            } else {
+                this.direction = 2;
+            }
+            if (this.prevX > this.x) {
+                this.direction = 8 - this.direction;
+            }
+        }
+        return true;
+    };
+    /** 
+     * 指定位置に移動できるか判定する
+     * @param {number} x 2Dマップ上の移動先X
+     * @param {number} y 2Dマップ上の移動先Y
+     * @return 移動できれば true
+     */
+    CharaData.prototype._isMove = function(x, y) {
+        if (this.x === x && this.y === y) {
+            return false;
+        }
+        if (this.moveQueue[0].x === x && this.moveQueue[0].y === y) {
+            return false;
+        }
+        return true;
+    };
+    /** 
+     * 移動を開始する
+     * @param {number} time 移動開始時間
+     */
+    CharaData.prototype.startMove = function(time) {
+        if (this.moveState === MOVE_STATE.STOP) {
+            if (this._getNextPos()) {
+                this.moveState = MOVE_STATE.MOVE;
+                this.moveStartTime = this.moveGridStartTime = time;
+            }
+        }
+    };
+    /** 
+     * 移動を進める
+     * @param {dungeon3d.Map} map マップオブジェクト
+     * @param {number} time 現在時間
+     */
+    CharaData.prototype.moveStep = function(map, time) {
+        if (this.moveState !== MOVE_STATE.MOVE) {
+            return false;
+        }
+        let diffTime = time - this.moveGridStartTime;
+        let moveX = this.x - this.prevX;
+        let moveY = this.y - this.prevY;
+        let stepTime = Math.sqrt(moveX * moveX + moveY * moveY) * 0.25;
+        while (diffTime >= stepTime) {
+            if (!this._getNextPos()) {
+                this.position = [
+                    this.x + 0.5, 
+                    this.map.getY(this.x, this.y), 
+                    this.y + 0.5
+                ];
+                this.moveState = MOVE_STATE.STOP;
+                this.pose = 0;
+                return false;
+            }
+            this.moveGridStartTime += stepTime;
+            diffTime -= stepTime;
+        }
+        diffTime /= stepTime;
+        this.position[0] = (this.x - this.prevX) * diffTime + this.prevX + 0.5;
+        this.position[2] = (this.y - this.prevY) * diffTime + this.prevY + 0.5;
+        if (diffTime < 0.5) {
+            this.position[1] = this.map.getY(this.prevX, this.prevY);
+        } else {
+            this.position[1] = this.map.getY(this.x, this.y);
+        }
+        diffTime = time - this.moveStartTime;
+        this.pose = Math.floor(diffTime * 12) % 8 + 1;
+        return true;
     };
     /** 
      * キャラクター管理
@@ -262,7 +347,6 @@
     if (typeof dungeon3d === 'undefined') {
         exports.CharaRenderer = CharaRenderer;
         exports.CharaManager = CharaManager;
-        exports.Footprint = Footprint;
     } else {
         dungeon3d.CharaRenderer = CharaRenderer;
         dungeon3d.CharaManager = CharaManager;

@@ -1,6 +1,6 @@
 'use strict';
 
-var exports = require('../app/script/character.js');
+var exports = require('../app/script/routefinder.js');
 
 describe('Footprint', function() {
     beforeEach(function() {
