@@ -15,11 +15,11 @@
     };
     /** 
      * 初期化
-     * @param {Array.<number>} start 探索開始位置 [x, y] 
+     * @param {object} start 探索開始位置 {x, y} 
      * @param {number} maxdepth 最大深度
      */
     Footprint.prototype.initalize = function(start, maxdepth) {
-        this.start = start; // [x, y]
+        this.start = start;
         this.depth = maxdepth;
         this.width = maxdepth * 2 + 1;
         // 配列作成 & 0 初期化
@@ -29,24 +29,23 @@
     };
     /** 
      * 探索済みの位置をマークする
-     * @param {Array.<number>} pos 探索位置 [x, y] 
+     * @param {object} pos 探索位置 {x, y} 
      * @param {number} no 設定する数値
      */
     Footprint.prototype.mark = function(pos, no) {
-        // pos === [x, y]
-        let x = pos[0] - this.start[0] + this.depth;
-        let y = pos[1] - this.start[1] + this.depth;
+        let x = pos.x - this.start.x + this.depth;
+        let y = pos.y - this.start.y + this.depth;
         this.footprint[y * this.width + x] = no;
     };
     /** 
      * 指定された位置に移動可能か判定する
-     * @param {Array.<number>} pos 探索位置 [x, y] 
+     * @param {object} pos 探索位置 {x, y} 
      * @param {number} count 設定する数値
      * @return {boolean} 移動可能なら true
      */
     Footprint.prototype.isMove = function(pos, count) {
-        let x = pos[0] - this.start[0] + this.depth;
-        let y = pos[1] - this.start[1] + this.depth;
+        let x = pos.x - this.start.x + this.depth;
+        let y = pos.y - this.start.y + this.depth;
         let mark = this.footprint[y * this.width + x];
         return mark === 0 || mark === count;
     };
@@ -55,8 +54,6 @@
         STOP: 0,
         MOVE: 1
     };
-    /** @const */
-    const MAX_MOVE_NUM = 16;
     /** 
      * 移動可能オブジェクト 
      * @constructor 
@@ -87,14 +84,10 @@
     };
     /** 
      * キューに移動先を追加
-     * @param {number} x 2Dマップ上の移動先X
-     * @param {number} y 2Dマップ上の移動先Y
+     * @param {object} pos 2Dマップ上の移動先
      */
-    RouteMovableObject.prototype.addMoveQueue = function(x, y) {
-        this.moveQueue.push({
-            x: x,
-            y: y
-        });
+    RouteMovableObject.prototype.addMoveQueue = function(pos) {
+        this.moveQueue.push(pos);
     };
     /** 
      * 次の移動場所を求める
@@ -107,7 +100,7 @@
         this.prevX = this.x;
         this.prevY = this.y;
 
-        let pos = this.moveQueue.shift();
+        let pos = this.moveQueue.pop();
         this.x = pos.x;
         this.y = pos.y;
         if (this.prevX === this.x) {
@@ -136,11 +129,12 @@
      * @param {number} y 2Dマップ上の移動先Y
      * @return {boolean} 移動できれば true
      */
-    RouteMovableObject.prototype._isMove = function(x, y) {
+    RouteMovableObject.prototype.isMove = function(x, y) {
         if (this.x === x && this.y === y) {
             return false;
         }
-        if (this.moveQueue[0].x === x && this.moveQueue[0].y === y) {
+
+        if (this.moveQueue.length > 0 && this.moveQueue[0].x === x && this.moveQueue[0].y === y) {
             return false;
         }
         return true;
@@ -169,12 +163,12 @@
         let diffTime = time - this.moveGridStartTime;
         let moveX = this.x - this.prevX;
         let moveY = this.y - this.prevY;
-        let stepTime = Math.sqrt(moveX * moveX + moveY * moveY) * 0.25;
+        let stepTime = Math.sqrt(moveX * moveX + moveY * moveY) * 400;
         while (diffTime >= stepTime) {
             if (!this._getNextPos()) {
                 this.position = [
                     this.x + 0.5, 
-                    this.map.getY(this.x, this.y), 
+                    map.getY(this.x, this.y), 
                     this.y + 0.5
                 ];
                 this.moveState = MOVE_STATE.STOP;
@@ -188,12 +182,12 @@
         this.position[0] = (this.x - this.prevX) * diffTime + this.prevX + 0.5;
         this.position[2] = (this.y - this.prevY) * diffTime + this.prevY + 0.5;
         if (diffTime < 0.5) {
-            this.position[1] = this.map.getY(this.prevX, this.prevY);
+            this.position[1] = map.getY(this.prevX, this.prevY);
         } else {
-            this.position[1] = this.map.getY(this.x, this.y);
+            this.position[1] = map.getY(this.x, this.y);
         }
         diffTime = time - this.moveStartTime;
-        this.pose = Math.floor(diffTime * 12) % 8 + 1;
+        this.pose = Math.floor(diffTime / 64) % 8;
         return true;
     };
     /** 
@@ -272,7 +266,7 @@
      * @constructor 
      */
     let RouteFinder = function() {
-
+        this.isMoveFunction = null;
     };
     /** @const */
     RouteFinder.FindStatus = {
@@ -349,11 +343,8 @@
             maxDepth = yDist;
         }
         maxDepth = maxDepth * 2; // 最大探索距離を直線距離の2倍に制限する。
-        if (maxDepth > MAX_MOVE_NUM) {
-            maxDepth = MAX_MOVE_NUM;
-        }
-
-        let footprint = new Footprint(mapPos, maxDepth);
+        let footprint = new Footprint();
+        footprint.initalize(mapPos, maxDepth);
         if (this.findRoute(movable, footprint, 0, maxDepth, mapPos, newPos) !== RouteFinder.FindStatus.OK) {
             movable.clearMoveQueue();
         }
@@ -364,14 +355,34 @@
      * @param {object} newPos 新しい位置
      * @return {boolean} 移動開始すれば true
      */
-    RouteFinder.prototype.move = function(movable, time, newPos) {
-        if (!movable._isMove(newPos)) {
+    RouteFinder.prototype.moveTo = function(movable, time, newPos) {
+        if (!movable.isMove(newPos.x, newPos.y)) {
             return false;
         }
         this.calcRoute(movable, newPos);
         movable.startMove(time);
         return true;
     };
+    /** 
+     * 外部移動判定関数を設定する
+     * @param {function(number, number)} func ルート探索用の足跡クラス 
+     */
+    RouteFinder.prototype.setIsMoveFunction = function(func) {
+        this.isMoveFunction = func;
+    };
+    /** 
+     * 移動可能か判定する
+     * @param {Footprint} footprint ルート探索用の足跡クラス 
+     * @param {number} count 移動カウンタ
+     * @return {boolean} 移動できるなら true
+     */
+    RouteFinder.prototype._isMove = function(footprint, count, pos) {
+        if (!this.isMoveFunction(pos.x, pos.y)) {
+            return false;
+        }
+        return footprint.isMove(pos, count);
+    };
+
     outer.Footprint = Footprint;
     outer.RouteFinder = RouteFinder;
     outer.RouteMovableObject = RouteMovableObject;

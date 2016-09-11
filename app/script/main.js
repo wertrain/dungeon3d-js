@@ -36,6 +36,8 @@
         let gl = sgl.getGL();
         let viewport = gl.getParameter(gl.VIEWPORT);
 
+        let date = new Date();
+
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
         gl.frontFace(gl.CCW);
@@ -45,7 +47,12 @@
         gl.clearDepth(1.0);
 
         camera.update();
+        let currentTime = 0;
         setInterval(() => {
+            // update
+            currentTime = Date.now();
+            charaManager.update(currentTime);
+            // render
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             camera.setViewParams(cameraRotX, -cameraRotY, -cameraZoom, charaManager.getChara(0).position);
             mapRenderer.render(gl, camera.getViewMatrix(), camera.getProjectionMatrix());
@@ -74,6 +81,10 @@
         $('canvas').on('mousedown', event => {
             switch (event.which) {
                 case 1: // 左クリック
+                    if (cursor.isVisible()) {
+                        let pos = cursor.getPos();
+                        charaManager.moveTo(0, pos.x, pos.y, currentTime);
+                    }
                     break;
                 case 3: // 右クリック
                     cameraDrag = true;

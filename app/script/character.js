@@ -8,6 +8,7 @@
      * @constructor 
      */
     let CharaData = function() {
+        outer.RouteMovableObject.call(this);
     };
     Object.setPrototypeOf(CharaData.prototype, outer.RouteMovableObject.prototype);
     /** 
@@ -16,7 +17,6 @@
      */
     let CharaManager = function() {
         this.map = null;
-        this.camera = null;
         this.charaArray = [];
     };
     /** 
@@ -25,6 +25,42 @@
      */
     CharaManager.prototype.initalize = function(map) {
         this.map = map;
+        this.routefinder = new outer.RouteFinder();
+        this.routefinder.setIsMoveFunction((x, y) => {
+            return map.isFloor(x, y);
+        });
+    };
+    /** 
+     * 全キャラクターを更新する
+     * @param {number} time 現在時間
+     */
+    CharaManager.prototype.update = function(time) {
+        let result = false;
+        for (let i = 0; i < this.charaArray.length; ++i) {
+            if (this.charaArray[i].moveStep(this.map, time)) {
+                result = true;
+            }
+        }
+        return result;
+    };
+    /** 
+     * キャラクターを移動する
+     * @param {number} index キャラクター配列のインデックス番号
+     * @param {number} x 移動位置X
+     * @param {number} y 移動位置Y
+     * @param {number} time 現在時間
+     * @return {boolean} 移動開始できれば true
+     */
+    CharaManager.prototype.moveTo = function(index, x, y, time) {
+        if (!this.map.isFloor(x, y)) {
+            return false;
+        }
+        let chara = this.charaArray[index];
+        if (chara === null) {
+            return false; 
+        }
+        let pos = {x: x, y: y};
+        return this.routefinder.moveTo(chara, time, pos);
     };
     /** 
      * 指定された位置にキャラクターを設置する
@@ -165,6 +201,7 @@
         for (let i = 0; i < this.renderObject.charaArray.length; ++i) {
             let chara = this.renderObject.charaArray[i];
             let charDir = (chara.direction + dir) % 8;
+            let charPose = chara.pose;
             let mMatrix = Matrix44.createIdentity();
             let mTrans = Matrix44.createIdentity();
             Matrix44.translate(mTrans, [
@@ -188,7 +225,7 @@
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.textureArray[textureNameArray[chara.type]]);
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.tboArray[i][charDir][0]);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.renderObject.tboArray[i][charDir][charPose]);
             gl.enableVertexAttribArray(this.attLocationArray['textureCoord']);
             gl.vertexAttribPointer(this.attLocationArray['textureCoord'], this.attStrideArray['textureCoord'], gl.FLOAT, false, 0, 0);
 

@@ -20,6 +20,15 @@
     Cursor.prototype.hide = function() {
         this.visible = false;
     };
+    Cursor.prototype.getPos = function() {
+        return {
+            x: this.x,
+            y: this.y
+        };
+    };
+    Cursor.prototype.isVisible = function() {
+        return this.visible;
+    };
     /** カーソル描画 */
     let CursorRenderer = function() {
         this.cursor = null;
