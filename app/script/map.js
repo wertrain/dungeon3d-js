@@ -459,6 +459,11 @@
     Map.prototype.getY = function(x, y) {
         return this.map[y][x];
     };
+    Map.prototype.isFloor = function(x, y) {
+        let rect = this.rectManager.getRect();
+        let vertexArray = this.rectManager.getVertexArray();
+        return vertexArray[rect[y][x][0]][1] === 0;
+    };
     Map.prototype.intersectFloor = function(ray, rayDir) {
         let rect = this.rectManager.getRect();
         let vertexArray = this.rectManager.getVertexArray();
