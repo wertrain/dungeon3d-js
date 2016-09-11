@@ -20,7 +20,7 @@
         camera.initalize(config);
 
         let charaManager = new dungeon3d.CharaManager();
-        charaManager.initalize(map, null);
+        charaManager.initalize(map);
         charaManager.putChara(10, 10, 0, 0);
         let charaRenderer = new dungeon3d.CharaRenderer();
         charaRenderer.initalize(charaManager, sgl, responses[1]);

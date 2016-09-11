@@ -1,13 +1,21 @@
 'use strict';
 
 {
-    /** ルート探索用の足跡クラス */
+    /** 
+     * ルート探索用の足跡クラス 
+     * @constructor 
+     */
     let Footprint = function() {
         this.start = null;
         this.depth = 0;
         this.width = 0;
         this.footprint = null;
     };
+    /** 
+     * 初期化
+     * @param {Array.<number>} start 探索開始位置 [x, y] 
+     * @param {number} maxdepth 最大深度
+     */
     Footprint.prototype.initalize = function(start, maxdepth) {
         this.start = start; // [x, y]
         this.depth = maxdepth;
@@ -17,19 +25,33 @@
         this.footprint = Array.apply(null, Array(this.width * this.width))
                               .map(function () {return 0;});
     };
+    /** 
+     * 探索済みの位置をマークする
+     * @param {Array.<number>} pos 探索位置 [x, y] 
+     * @param {number} no 設定する数値
+     */
     Footprint.prototype.mark = function(pos, no) {
         // pos === [x, y]
         let x = pos[0] - this.start[0] + this.depth;
         let y = pos[1] - this.start[1] + this.depth;
         this.footprint[y * this.width + x] = no;
     };
+    /** 
+     * 指定された位置に移動可能か判定する
+     * @param {Array.<number>} pos 探索位置 [x, y] 
+     * @param {number} count 設定する数値
+     * @return {boolean} 移動可能なら true
+     */
     Footprint.prototype.isMove = function(pos, count) {
         let x = pos[0] - this.start[0] + this.depth;
         let y = pos[1] - this.start[1] + this.depth;
         let mark = this.footprint[y * this.width + x];
         return mark === 0 || mark === count;
     };
-    /** キャラクター */
+    /** 
+     * キャラクター
+     * @constructor 
+     */
     let CharaData = function() {
         this.x = 0; // 2D マップ上のX位置
         this.y = 0; // 2D マップ上のY位置
@@ -38,16 +60,30 @@
         this.type = 0; // キャラタイプ
         this.position = []; // 3D 上の位置
     };
-    /** キャラクター管理 */
+    /** 
+     * キャラクター管理
+     * @constructor 
+     */
     let CharaManager = function() {
         this.map = null;
         this.camera = null;
         this.charaArray = [];
     };
-    CharaManager.prototype.initalize = function(map, camera) {
+    /** 
+     * 初期化
+     * @param {dungeon3d.Map} map マップオブジェクト
+     */
+    CharaManager.prototype.initalize = function(map) {
         this.map = map;
-        this.camera = camera;
     };
+    /** 
+     * 指定された位置にキャラクターを設置する
+     * @param {number} x 設置位置X
+     * @param {number} y 設置位置Y
+     * @param {number} dir キャラクターの向き
+     * @param {number} type キャラクターのタイプ
+     * @return {boolean} （現在は） 常に true
+     */
     CharaManager.prototype.putChara = function(x, y, dir, type) {
         let chara = new CharaData();
         chara.x = x;
@@ -59,13 +95,25 @@
         this.charaArray.push(chara);
         return true;
     };
+    /** 
+     * キャラクターデータ配列を取得する
+     * @return {Array.<CharaData>} キャラクターデータ配列
+     */
     CharaManager.prototype.getCharaArray = function() {
         return this.charaArray;
     };
+    /** 
+     * 指定された index 番目のキャラクターを取得する
+     * @param {number} index インデックス
+     * @return {CharaData} キャラクターデータ
+     */
     CharaManager.prototype.getChara = function(index) {
         return this.charaArray[index];
     };
-    /** キャラクター描画 */
+    /** 
+     * キャラクター描画
+     * @constructor 
+     */
     let CharaRenderer = function() {
         this.charaManager = null;
         this.program = null;
@@ -75,6 +123,12 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
+    /** 
+     * 初期化
+     * @param {dungeon3d.CharaManager} charaManager キャラクター管理
+     * @param {SimpleGL} sgl WebGL ユーティリティ
+     * @param {Array.<*>} resouces リソースデータ配列（getNeedResoucesで要求したデータ）
+     */
     CharaRenderer.prototype.initalize = function(charaManager, sgl, resouces) {
         let gl = sgl.getGL();
         let vs = sgl.compileShader(0, resouces[0]);
@@ -131,7 +185,13 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    CharaRenderer.prototype.render = function(gl, camera) {
+    /** 
+     * 描画
+     * @param {dungeon3d.CharaManager} charaManager キャラクター管理
+     * @param {webgl} gl webgl オブジェクト
+     * @param {dungeon3d.Camera} camera カメラオブジェクト
+     */
+    CharaRenderer.prototype.render = function(gl,camera) {
         let viewRot = camera.getViewRotation();
         let mRot = Matrix44.createIdentity();
         //Matrix44.rotate(mRot, Math.PI / 2, [1.0, 0.0, 0.0], mRot);
@@ -191,6 +251,10 @@
 
         gl.disable(gl.BLEND);
     };
+    /** 
+     * 描画に必要なリソース配列を取得する
+     * @return {Array.<string>} リソースまでのパスの配列
+     */
     CharaRenderer.getNeedResouces = function() {
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/player_move.png'];
     };
