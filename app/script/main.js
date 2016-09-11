@@ -77,14 +77,12 @@
             }
         });
         let cameraDrag = false;
+        let charaMove = false;
         let dragStartX = 0, dragStartY = 0;
         $('canvas').on('mousedown', event => {
             switch (event.which) {
                 case 1: // 左クリック
-                    if (cursor.isVisible()) {
-                        let pos = cursor.getPos();
-                        charaManager.moveTo(0, pos.x, pos.y, currentTime);
-                    }
+                    charaMove = true;
                     break;
                 case 3: // 右クリック
                     cameraDrag = true;
@@ -94,8 +92,14 @@
             }
         });
         $('canvas').on('mouseup', event => {
-            event; // unused-varsへの対処
-            cameraDrag = false;
+            switch (event.which) {
+                case 1: // 左クリック
+                    charaMove = false;
+                    break;
+                case 3: // 右クリック
+                    cameraDrag = false;
+                    break;
+            }
         });
         $('canvas').on('mousemove', event => {
             if (cameraDrag) {
@@ -126,6 +130,9 @@
                 let hit = map.intersectFloor(vecNear, rayDir);
                 if (hit) {
                     cursor.put(hit.x, hit.y);
+                    if (charaMove) {
+                        charaManager.moveTo(0, hit.x, hit.y, currentTime);
+                    }
                 } else {
                     cursor.hide();
                 }
