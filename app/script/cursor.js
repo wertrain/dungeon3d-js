@@ -1,6 +1,8 @@
 'use strict';
 
 {
+    /** @const */
+    const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
     /** カーソル */
     let Cursor = function() {
         this.x = 0; // 2D マップ上のX位置
@@ -92,11 +94,6 @@
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/cursor.png'];
     };
 
-    if (typeof dungeon3d === 'undefined') {
-        exports.CursorRenderer = CursorRenderer;
-        exports.Cursor = Cursor;
-    } else {
-        dungeon3d.CursorRenderer = CursorRenderer;
-        dungeon3d.Cursor = Cursor;
-    }
+    outer.CursorRenderer = CursorRenderer;
+    outer.Cursor = Cursor;
 }

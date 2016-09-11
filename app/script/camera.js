@@ -1,6 +1,8 @@
 'use strict';
 
 {
+    /** @const */
+    const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
     /** カメラ */
     let Camera = function() {
         this.position = [];
@@ -91,9 +93,5 @@
         return this.projection;
     };
 
-    if (typeof dungeon3d === 'undefined') {
-        exports.PerspectiveCamera = PerspectiveCamera;
-    } else {
-        dungeon3d.PerspectiveCamera = PerspectiveCamera;
-    }
+    outer.PerspectiveCamera = PerspectiveCamera;
 }
