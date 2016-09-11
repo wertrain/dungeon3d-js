@@ -2,149 +2,14 @@
 
 {
     /** @const */
-    let MOVE_STATE = {
-        STOP: 0,
-        MOVE: 1
-    };
+    const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
     /** 
      * キャラクター
      * @constructor 
      */
     let CharaData = function() {
-        this.x = 0; // 2D マップ上のX位置
-        this.y = 0; // 2D マップ上のY位置
-        this.direction = 0; // 方向
-        this.pose = 0; // 姿勢
-        this.type = 0; // キャラタイプ
-        this.position = []; // 3D 上の位置
-
-        this.prevX = 0; // 2D マップ上の以前のX位置
-        this.prevY = 0; // 2D マップ上の以前のY位置
-        this.moveQueue = []; // 移動先キュー
-        this.moveStartTime = 0; // 移動開始時間
-        this.moveGridStartTime = 0; // 移動開始時間（1マス）
-        this.moveState = MOVE_STATE.STOP; // キャラ状態
     };
-    /** 
-     * 移動キューをクリアする
-     */
-    CharaData.prototype.clearMoveQueue = function() {
-        // 参照を切らさない方法2つ
-        // this.moveQueue.clear();
-        // this.moveQueue.length = 0;
-        // 今は参照が切れても問題ない
-        this.moveQueue = [];
-    };
-    /** 
-     * キューに移動先を追加
-     * @param {number} x 2Dマップ上の移動先X
-     * @param {number} y 2Dマップ上の移動先Y
-     */
-    CharaData.prototype.addMoveQueue = function(x, y) {
-        this.moveQueue.push({
-            x: x,
-            y: y
-        });
-    };
-    /** 
-     * 次の移動場所を求める
-     */
-    CharaData.prototype._getNextPos = function() {
-        if (this.moveQueue.length === 0) {
-            return false;
-        }
-        this.prevX = this.x;
-        this.prevY = this.y;
-
-        let pos = this.moveQueue.shift();
-        this.x = pos.x;
-        this.y = pos.y;
-        if (this.prevX === this.x) {
-            if (this.prevY < this.y) {
-                this.direction = 4;
-            } else {
-                this.direction = 0;
-            }
-        } else {
-            if (this.prevY < this.y) {
-                this.direction = 3;
-            } else if (this.prevY > this.y) {
-                this.direction = 1;
-            } else {
-                this.direction = 2;
-            }
-            if (this.prevX > this.x) {
-                this.direction = 8 - this.direction;
-            }
-        }
-        return true;
-    };
-    /** 
-     * 指定位置に移動できるか判定する
-     * @param {number} x 2Dマップ上の移動先X
-     * @param {number} y 2Dマップ上の移動先Y
-     * @return 移動できれば true
-     */
-    CharaData.prototype._isMove = function(x, y) {
-        if (this.x === x && this.y === y) {
-            return false;
-        }
-        if (this.moveQueue[0].x === x && this.moveQueue[0].y === y) {
-            return false;
-        }
-        return true;
-    };
-    /** 
-     * 移動を開始する
-     * @param {number} time 移動開始時間
-     */
-    CharaData.prototype.startMove = function(time) {
-        if (this.moveState === MOVE_STATE.STOP) {
-            if (this._getNextPos()) {
-                this.moveState = MOVE_STATE.MOVE;
-                this.moveStartTime = this.moveGridStartTime = time;
-            }
-        }
-    };
-    /** 
-     * 移動を進める
-     * @param {dungeon3d.Map} map マップオブジェクト
-     * @param {number} time 現在時間
-     */
-    CharaData.prototype.moveStep = function(map, time) {
-        if (this.moveState !== MOVE_STATE.MOVE) {
-            return false;
-        }
-        let diffTime = time - this.moveGridStartTime;
-        let moveX = this.x - this.prevX;
-        let moveY = this.y - this.prevY;
-        let stepTime = Math.sqrt(moveX * moveX + moveY * moveY) * 0.25;
-        while (diffTime >= stepTime) {
-            if (!this._getNextPos()) {
-                this.position = [
-                    this.x + 0.5, 
-                    this.map.getY(this.x, this.y), 
-                    this.y + 0.5
-                ];
-                this.moveState = MOVE_STATE.STOP;
-                this.pose = 0;
-                return false;
-            }
-            this.moveGridStartTime += stepTime;
-            diffTime -= stepTime;
-        }
-        diffTime /= stepTime;
-        this.position[0] = (this.x - this.prevX) * diffTime + this.prevX + 0.5;
-        this.position[2] = (this.y - this.prevY) * diffTime + this.prevY + 0.5;
-        if (diffTime < 0.5) {
-            this.position[1] = this.map.getY(this.prevX, this.prevY);
-        } else {
-            this.position[1] = this.map.getY(this.x, this.y);
-        }
-        diffTime = time - this.moveStartTime;
-        this.pose = Math.floor(diffTime * 12) % 8 + 1;
-        return true;
-    };
+    Object.setPrototypeOf(CharaData.prototype, outer.RouteMovableObject.prototype);
     /** 
      * キャラクター管理
      * @constructor 
@@ -343,12 +208,6 @@
     CharaRenderer.getNeedResouces = function() {
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/player_move.png'];
     };
-
-    if (typeof dungeon3d === 'undefined') {
-        exports.CharaRenderer = CharaRenderer;
-        exports.CharaManager = CharaManager;
-    } else {
-        dungeon3d.CharaRenderer = CharaRenderer;
-        dungeon3d.CharaManager = CharaManager;
-    }
+    outer.CharaRenderer = CharaRenderer;
+    outer.CharaManager = CharaManager;
 }
