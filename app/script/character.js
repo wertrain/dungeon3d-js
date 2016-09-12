@@ -172,7 +172,7 @@
         this.attStrideArray['normal'] = 3;
     };
     /** 
-     * 描画
+     * 全キャラクターを描画する
      * @param {dungeon3d.CharaManager} charaManager キャラクター管理
      * @param {webgl} gl webgl オブジェクト
      * @param {dungeon3d.Camera} camera カメラオブジェクト
