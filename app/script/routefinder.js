@@ -14,7 +14,7 @@
         this.footprint = null;
     };
     /** 
-     * 初期化
+     * 初期化する
      * @param {object} start 探索開始位置 {x, y} 
      * @param {number} maxdepth 最大深度
      */

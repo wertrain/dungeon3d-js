@@ -100,8 +100,8 @@
     /** 
      * カーソルを描画する
      * @param {webgl} gl webgl オブジェクト
-     * @param {Matrix44} view ビュー行列
-     * @param {Matrix44} projection プロジェクション行列
+     * @param {Array.<number>|Matrix44} view ビュー行列
+     * @param {Array.<number>|Matrix44} projection プロジェクション行列
      */
     CursorRenderer.prototype.render = function(gl, view, projection) {
         if (!this.cursor.visible) {
