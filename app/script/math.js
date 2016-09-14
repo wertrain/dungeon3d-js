@@ -1,8 +1,15 @@
-// ------------------------------------------------------------------------------------------------
-// Vector3
-// ------------------------------------------------------------------------------------------------
+/** 
+ * Vector3 
+ */
 var Vector3 = function() {
 };
+/** 
+ * ベクターを作成する
+ * @param {number} x x要素（省略可能）
+ * @param {number} y y要素（省略可能）
+ * @param {number} z z要素（省略可能）
+ * @return {Float32Array(3)} ベクター
+ */
 Vector3.create = function(x, y, z) {
     let vec = new Float32Array(3);
     vec[0] = x || 0;
@@ -141,10 +148,10 @@ Vector3.innerProduct = function(vec, x, y, z) {
     return vec[0] * x + vec[1] * y + vec[2] * z;
 };
 
-// ------------------------------------------------------------------------------------------------
-// Matrix44
-// based on minMatrix.js (https://wgld.org/j/minMatrix.js)
-// ------------------------------------------------------------------------------------------------
+/** 
+ * Matrix44
+ * @note based on minMatrix.js (https://wgld.org/j/minMatrix.js)
+ */
 var Matrix44 = function() {
 };
 Matrix44.create = function() {
@@ -357,9 +364,9 @@ Matrix44.inverse = function(mat, dest) {
     return dest;
 };
 
-// ------------------------------------------------------------------------------------------------
-// MathUtil
-// ------------------------------------------------------------------------------------------------
+/** 
+ * MathUtil
+ */
 var MathUtil = function() {
 };
 MathUtil.intersectTriangle = function(v0, v1, v2, ray, rayDir, out) {
