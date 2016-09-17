@@ -4,11 +4,11 @@
 var Vector3 = function() {
 };
 /** 
- * ベクターを作成する
+ * ベクトルを作成する
  * @param {number} x x要素（省略可能）
  * @param {number} y y要素（省略可能）
  * @param {number} z z要素（省略可能）
- * @return {Float32Array(3)} ベクター
+ * @return {Float32Array[3]} ベクトル
  */
 Vector3.create = function(x, y, z) {
     let vec = new Float32Array(3);
@@ -17,12 +17,25 @@ Vector3.create = function(x, y, z) {
     vec[2] = z || 0;
     return vec;
 };
+/** 
+ * 逆ベクトルを作成する
+ * @param {Float32Array[3]} vec 元ベクトル
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 Vector3.negative = function(vec, dest) {
     dest[0] = -vec[0];
     dest[1] = -vec[1];
     dest[2] = -vec[2];
     return dest;
 };
+/** 
+ * ベクトルを加算する
+ * @param {Float32Array[3]} v1 加算ベクトル
+ * @param {Float32Array[3]|number} v2 加算ベクトル、もしくは数値
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 Vector3.add = function(v1, v2, dest) {
     if (typeof (v2) === 'object') {
         dest[0] = v1[0] + v2[0];
@@ -35,6 +48,13 @@ Vector3.add = function(v1, v2, dest) {
     }
     return dest;
 };
+/** 
+ * ベクトルを減算する
+ * @param {Float32Array[3]} v1 減算ベクトル
+ * @param {Float32Array[3]|number} v2 減算ベクトル、もしくは数値
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 Vector3.subtract = function(v1, v2, dest) {
     if (typeof (v2) === 'object') {
         dest[0] = v1[0] - v2[0];
@@ -46,6 +66,13 @@ Vector3.subtract = function(v1, v2, dest) {
         dest[2] = v1[2] - v2;
     }
 };
+/** 
+ * ベクトルを乗算する
+ * @param {Float32Array[3]} v1 乗算ベクトル
+ * @param {Float32Array[3]|number} v2 乗算ベクトル、もしくは数値
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 Vector3.multiply = function(v1, v2, dest) {
     if (typeof (v2) === 'object') {
         dest[0] = v1[0] * v2[0];
@@ -58,6 +85,13 @@ Vector3.multiply = function(v1, v2, dest) {
     }
     return dest;
 };
+/** 
+ * ベクトルを除算する
+ * @param {Float32Array[3]} v1 除算ベクトル
+ * @param {Float32Array[3]|number} v2 除算ベクトル、もしくは数値
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 Vector3.divide = function(v1, v2, dest) {
     if (typeof (v2) === 'object') {
         dest[0] = v1[0] / v2[0];
@@ -70,27 +104,68 @@ Vector3.divide = function(v1, v2, dest) {
     }
     return dest;
 };
+/** 
+ * ベクトルを比較する
+ * @param {Float32Array[3]} v1 比較ベクトル
+ * @param {Float32Array[3]} v2 比較ベクトル
+ * @return {boolean} 比較結果
+ */
 Vector3.equals = function(v1, v2) {
     return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2];
 };
+/** 
+ * ベクトルを内積を計算する
+ * @param {Float32Array[3]} v1 ベクトル1
+ * @param {Float32Array[3]} v2 ベクトル2
+ * @return {boolean} 内積
+ */
 Vector3.dot = function(v1, v2) {
     return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 };
+/** 
+ * ベクトルを外積を計算する
+ * @param {Float32Array[3]} v1 ベクトル1
+ * @param {Float32Array[3]} v2 ベクトル2
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 Vector3.cross = function(v1, v2, dest) {
     dest[0] = v1[1] * v2[2] - v1[2] * v2[1];
     dest[1] = v1[2] * v2[0] - v1[0] * v2[2];
     dest[2] = v1[0] * v2[1] - v1[1] * v2[0];
     return dest;
 };
+/** 
+ * ベクトルを長さを計算する
+ * @param {Float32Array[3]} vec 長さ
+ * @return {number} ベクトルの長さ
+ */
 var Vector3Length = function (vec) {
     return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
 };
+/** 
+ * ベクトルを長さを計算する
+ * @param {Float32Array[3]} vec 長さ
+ * @return {number} ベクトルの長さ
+ */
 Vector3.size = function(vec) { // length
     return Vector3Length(vec);
 };
+/** 
+ * 単位ベクトルを作成する
+ * @param {Float32Array[3]} vec 元ベクトル
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 Vector3.unit = function(vec, dest) {
     return this.divide(vec, Vector3Length(vec), dest);
 };
+/** 
+ * ベクトルを正規化する
+ * @param {Float32Array[3]} vec 元ベクトル
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 Vector3.normalize = function(vec, dest) {
     let x = vec[0], y = vec[1], z = vec[2];
     let len = Vector3Length(vec);
@@ -100,12 +175,27 @@ Vector3.normalize = function(vec, dest) {
     dest[2] = z * m;
     return dest;
 };
+/** 
+ * ベクトルの最小値を取得する
+ * @param {Float32Array[3]} vec 対象ベクトル
+ * @return {number} 最小値
+ */
 Vector3.min = function(vec) {
     return Math.min(Math.min(vec[0], vec[1]), vec[2]);
 },
+/** 
+ * ベクトルの最大値を取得する
+ * @param {Float32Array[3]} vec 対象ベクトル
+ * @return {number} 最大値
+ */
 Vector3.max = function(vec) {
     return Math.max(Math.max(vec[0], vec[1]), vec[2]);
 };
+/** 
+ * ベクトルがなす角度を取得する
+ * @param {Float32Array[3]} vec 対象ベクトル
+ * @return {object} 角度オブジェクト
+ */
 Vector3.toAngle = function(vec) {
     return {
         theta: Math.atan2(vec[2], vec[0]),
@@ -115,6 +205,12 @@ Vector3.toAngle = function(vec) {
 Vector3.angleTo = function(vec, a) {
     return Math.acos(this.dot(a) / (Vector3Length(vec) * Vector3Length(a)));
 };
+/** 
+ * ベクトルをコピーする
+ * @param {Float32Array[3]} vec 対象ベクトル
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 Vector3.clone = function(vec, dest) {
     if (typeof dest === 'undefined') {
         dest = this.create();
