@@ -1,7 +1,10 @@
 'use strict';
 
 /** 
- * Vector3 
+ * 3次元ベクトルを扱う
+ * このクラスはインスタンスを生成せずに使用する
+ * let vector = Vector3.create();
+ * ここで vector の実体は Float32Array(3) 
  */
 var Vector3 = function() {
 };
@@ -233,7 +236,10 @@ Vector3.innerProduct = function(vec, x, y, z) {
 };
 
 /** 
- * Matrix44
+ * 4x4行列を扱う
+ * このクラスはインスタンスを生成せずに使用する
+ * let matrix = Matrix44.create();
+ * ここで Matrix44 の実体は Float32Array(16) 
  * @note based on minMatrix.js (https://wgld.org/j/minMatrix.js)
  */
 var Matrix44 = function() {
