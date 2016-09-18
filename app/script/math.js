@@ -6,7 +6,7 @@
 var Vector3 = function() {
 };
 /** 
- * ベクトルを作成する
+ * 3次元ベクトルを作成する
  * @param {number} x x要素（省略可能）
  * @param {number} y y要素（省略可能）
  * @param {number} z z要素（省略可能）
@@ -238,9 +238,18 @@ Vector3.innerProduct = function(vec, x, y, z) {
  */
 var Matrix44 = function() {
 };
+/** 
+ * 4x4行列を作成する
+ * @return {Float32Array[16]} 行列
+ */
 Matrix44.create = function() {
     return new Float32Array(16);
 };
+/** 
+ * 単位行列にする
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.identity = function(dest) {
     dest[0]  = 1; dest[1]  = 0; dest[2]  = 0; dest[3]  = 0;
     dest[4]  = 0; dest[5]  = 1; dest[6]  = 0; dest[7]  = 0;
@@ -248,10 +257,21 @@ Matrix44.identity = function(dest) {
     dest[12] = 0; dest[13] = 0; dest[14] = 0; dest[15] = 1;
     return dest;
 };
+/** 
+ * 単位行列を作成する
+ * @return {Float32Array[16]} 行列（単位行列として初期化済み）
+ */
 Matrix44.createIdentity = function() {
     let mat = this.create();
     return this.identity(mat);
 };
+/**
+ * 行列同士を乗算する
+ * @param {Float32Array[16]} mat1 対象の行列
+ * @param {Float32Array[16]} mat2 対象の行列
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.multiply = function(mat1, mat2, dest) {
     let a = mat1[0],  b = mat1[1],  c = mat1[2],  d = mat1[3],
         e = mat1[4],  f = mat1[5],  g = mat1[6],  h = mat1[7],
@@ -279,6 +299,13 @@ Matrix44.multiply = function(mat1, mat2, dest) {
     dest[15] = M * d + N * h + O * l + P * p;
     return dest;
 };
+/**
+ * 行列とベクトルを乗算する
+ * @param {Float32Array[16]} mat 対象の行列
+ * @param {Float32Array[3]} vec 対象のベクトル
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.scale = function(mat, vec, dest) {
     dest[0]  = mat[0]  * vec[0];
     dest[1]  = mat[1]  * vec[0];
@@ -298,6 +325,13 @@ Matrix44.scale = function(mat, vec, dest) {
     dest[15] = mat[15];
     return dest;
 };
+/**
+ * 平行移動行列にする
+ * @param {Float32Array[16]} mat 対象の行列
+ * @param {Float32Array[3]} vec 移動先
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.translate = function(mat, vec, dest) {
     dest[0] = mat[0]; dest[1] = mat[1]; dest[2]  = mat[2];  dest[3]  = mat[3];
     dest[4] = mat[4]; dest[5] = mat[5]; dest[6]  = mat[6];  dest[7]  = mat[7];
@@ -308,6 +342,14 @@ Matrix44.translate = function(mat, vec, dest) {
     dest[15] = mat[3] * vec[0] + mat[7] * vec[1] + mat[11] * vec[2] + mat[15];
     return dest;
 };
+/**
+ * 回転行列にする
+ * @param {Float32Array[16]} mat 対象の行列
+ * @param {number} angle 回転角度
+ * @param {Float32Array[3]} axis 回転軸
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.rotate = function(mat, angle, axis, dest) {
     let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
     if(!sq){return null;}
@@ -348,6 +390,14 @@ Matrix44.rotate = function(mat, angle, axis, dest) {
     dest[11] = j * y + n * z + r * A;
     return dest;
 },
+/**
+ * 視野変換行列にする
+ * @param {Float32Array[3]} eye 始点
+ * @param {Float32Array[3]} center 注視店
+ * @param {Float32Array[3]} up 向き
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.lookAt = function(eye, center, up, dest) {
     let eyeX    = eye[0],    eyeY    = eye[1],    eyeZ    = eye[2],
         upX     = up[0],     upY     = up[1],     upZ     = up[2],
@@ -384,6 +434,15 @@ Matrix44.lookAt = function(eye, center, up, dest) {
     dest[15] = 1;
     return dest;
 };
+/**
+ * 透視投影行列にする
+ * @param {number} eye 画角
+ * @param {number} aspect 表示領域の縦横比
+ * @param {number} near 前方面の位置
+ * @param {number} far 後方面の位置
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.perspective = function(fovy, aspect, near, far, dest) {
     let t = near * Math.tan(fovy * Math.PI / 360);
     let r = t * aspect;
@@ -406,6 +465,12 @@ Matrix44.perspective = function(fovy, aspect, near, far, dest) {
     dest[15] = 0;
     return dest;
 };
+/**
+ * 転置行列にする
+ * @param {Float32Array[16]} mat 対象の行列
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.transpose = function(mat, dest) {
     dest[0]  = mat[0];  dest[1]  = mat[4];
     dest[2]  = mat[8];  dest[3]  = mat[12];
@@ -417,6 +482,12 @@ Matrix44.transpose = function(mat, dest) {
     dest[14] = mat[11]; dest[15] = mat[15];
     return dest;
 };
+/**
+ * 逆行列にする
+ * @param {Float32Array[16]} mat 対象の行列
+ * @param {Float32Array[16]} dest 書き込み先
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 Matrix44.inverse = function(mat, dest) {
     let a = mat[0],  b = mat[1],  c = mat[2],  d = mat[3],
         e = mat[4],  f = mat[5],  g = mat[6],  h = mat[7],
@@ -453,6 +524,16 @@ Matrix44.inverse = function(mat, dest) {
  */
 var MathUtil = function() {
 };
+/**
+ * レイと三角形の交差判定をする
+ * @param {Float32Array[3]} v0 三角形の頂点1
+ * @param {Float32Array[3]} v1 三角形の頂点2
+ * @param {Float32Array[3]} v2 三角形の頂点3
+ * @param {Float32Array[3]} ray レイの始点
+ * @param {Float32Array[3]} rayDir レイの方向
+ * @param {Float32Array[3]} out レイが交差した位置
+ * @return {Float32Array[3]} レイが交差した位置, 交差しなければ null
+ */
 MathUtil.intersectTriangle = function(v0, v1, v2, ray, rayDir, out) {
     let edge1 = Vector3.create(), edge2 = Vector3.create();
     Vector3.subtract(v1, v0, edge1);
@@ -478,6 +559,13 @@ MathUtil.intersectTriangle = function(v0, v1, v2, ray, rayDir, out) {
     out[2] = ray[2] + t * rayDir[2];
     return out;
 };
+/**
+ * ベクトルを行列で座標変換する
+ * @param {Float32Array[3]} vec 対象のベクトル
+ * @param {Float32Array[16]} mat 変換行列
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {Float32Array[3]} 書き込み先
+ */
 MathUtil.transformCoord = function(vec, mat, dest) {
     let x = vec[0], y = vec[1], z = vec[2],
         w = mat[3] * x + mat[7] * y + mat[11] * z + mat[15];
@@ -487,6 +575,15 @@ MathUtil.transformCoord = function(vec, mat, dest) {
     dest[2] = (mat[2] * x + mat[6] * y + mat[10] * z + mat[14]) / w;
     return dest;
 };
+/**
+ * 3D 空間上の位置を画面座標に変換
+ * @param {Float32Array[3]} pos 位置座標
+ * @param {Float32Array[16]} view ビュー行列
+ * @param {Float32Array[16]} proj プロジェクション行列
+ * @param {Array.<number>} viewport ビューポート
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {boolean} 変換できれば true
+ */
 MathUtil.project = function(pos, view, proj, viewport, dest) {
     // Transformation vectors
     let temp = new Array(8);
@@ -503,7 +600,7 @@ MathUtil.project = function(pos, view, proj, viewport, dest) {
     temp[7] = -temp[2];
     // The result normalizes between -1 and 1
     if (temp[7] === 0.0) { // The w value
-        return 0;
+        return false;
     }
     temp[7] = 1.0 / temp[7];
     // Perspective division
@@ -516,8 +613,17 @@ MathUtil.project = function(pos, view, proj, viewport, dest) {
     dest[1] = (temp[5] * 0.5 + 0.5) * viewport[3] + viewport[1];
     // This is only correct when glDepthRange(0.0, 1.0)
     dest[2] = (1.0 + temp[6]) * 0.5; // Between 0 and 1
-    return 1;
+    return true;
 };
+/**
+ * 画面座標から 3D 空間上の位置を取得する
+ * @param {Float32Array[3]} winpos 画面座標
+ * @param {Float32Array[16]} view ビュー行列
+ * @param {Float32Array[16]} proj プロジェクション行列
+ * @param {Array.<number>} viewport ビューポート
+ * @param {Float32Array[3]} dest 書き込み先
+ * @return {boolean} 変換できれば true
+ */
 MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
     // Transformation matrices
     let m = Matrix44.createIdentity(), A = Matrix44.createIdentity();
@@ -535,14 +641,21 @@ MathUtil.unproject = function(winpos, view, proj, viewport, dest) {
     //Objects coordinates
     this._multiplyMatrixByVector4by4(outArray, m, inArray);
     if(outArray[3] === 0.0) {
-        return 0;
+        return false;
     }
     outArray[3] = 1.0 / outArray[3];
     dest[0] = outArray[0] * outArray[3];
     dest[1] = outArray[1] * outArray[3];
     dest[2] = outArray[2] * outArray[3];
-    return 1;
+    return true;
 };
+/**
+ * 行列同士を乗算する
+ * @param {Float32Array[16]} result 書き込み先
+ * @param {Float32Array[16]} matrix1 対象の行列
+ * @param {Float32Array[16]} matrix2 対象の行列
+ * @return {Float32Array[16]} 書き込み先行列
+ */
 MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {
     result[0]=matrix1[0]*matrix2[0]+
       matrix1[4]*matrix2[1]+
@@ -610,6 +723,13 @@ MathUtil._multiplyMatrices4by4 = function(result, matrix1, matrix2) {
       matrix1[15]*matrix2[15];
     return result;
 };
+/**
+ * ベクトルと行列を乗算する
+ * @param {Float32Array[3]} resultvector 書き込み先
+ * @param {Float32Array[16]} matrix 対象の行列
+ * @param {Float32Array[3]} pvector 対象のベクトル
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 MathUtil._multiplyMatrixByVector4by4 = function (resultvector, matrix, pvector) {
     resultvector[0]=matrix[0]*pvector[0]+matrix[4]*pvector[1]+matrix[8]*pvector[2]+matrix[12]*pvector[3];
     resultvector[1]=matrix[1]*pvector[0]+matrix[5]*pvector[1]+matrix[9]*pvector[2]+matrix[13]*pvector[3];
