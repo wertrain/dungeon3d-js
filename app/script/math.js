@@ -616,7 +616,7 @@ MathUtil.project = function(pos, view, proj, viewport, dest) {
     return true;
 };
 /**
- * 画面座標から 3D 空間上の位置を取得する
+ * 画面座標から 3D 空間上の位置に変換
  * @param {Float32Array[3]} winpos 画面座標
  * @param {Float32Array[16]} view ビュー行列
  * @param {Float32Array[16]} proj プロジェクション行列
