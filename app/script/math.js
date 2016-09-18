@@ -211,7 +211,7 @@ Vector3.clone = function(vec, dest) {
 /** 
  * 線形補間する
  * @param {Float32Array[3]} vec1 対象ベクトル
- * @param {Float32Array[3]} vec2 対象ベクトル
+ * @param {Float32Array[3]} vec2 目標ベクトル
  * @param {Float32Array[3]|number} fraction 量
  * @return {Float32Array[3]} 書き込み先ベクトル
  */
