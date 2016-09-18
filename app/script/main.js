@@ -36,8 +36,6 @@
         let gl = sgl.getGL();
         let viewport = gl.getParameter(gl.VIEWPORT);
 
-        let date = new Date();
-
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
         gl.frontFace(gl.CCW);
