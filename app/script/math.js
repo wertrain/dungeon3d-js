@@ -1,3 +1,5 @@
+'use strict';
+
 /** 
  * Vector3 
  */
@@ -152,15 +154,6 @@ Vector3.size = function(vec) { // length
     return Vector3Length(vec);
 };
 /** 
- * 単位ベクトルを作成する
- * @param {Float32Array[3]} vec 元ベクトル
- * @param {Float32Array[3]} dest 書き込み先
- * @return {Float32Array[3]} 書き込み先ベクトル
- */
-Vector3.unit = function(vec, dest) {
-    return this.divide(vec, Vector3Length(vec), dest);
-};
-/** 
  * ベクトルを正規化する
  * @param {Float32Array[3]} vec 元ベクトル
  * @param {Float32Array[3]} dest 書き込み先
@@ -192,18 +185,13 @@ Vector3.max = function(vec) {
     return Math.max(Math.max(vec[0], vec[1]), vec[2]);
 };
 /** 
- * ベクトルがなす角度を取得する
- * @param {Float32Array[3]} vec 対象ベクトル
- * @return {object} 角度オブジェクト
+ * 二つのベクトルがなす角度を取得する
+ * @param {Float32Array[3]} v1 対象ベクトル
+ * @param {Float32Array[3]} v2 対象ベクトル
+ * @return {number} 角度
  */
-Vector3.toAngle = function(vec) {
-    return {
-        theta: Math.atan2(vec[2], vec[0]),
-        phi: Math.asin(vec[1] / Vector3Length(vec))
-    };
-};
-Vector3.angleTo = function(vec, a) {
-    return Math.acos(this.dot(a) / (Vector3Length(vec) * Vector3Length(a)));
+Vector3.angleTo = function(v1, v2) {
+    return Math.acos(Vector3.dot(v2) / (Vector3Length(v1) * Vector3Length(v2)));
 };
 /** 
  * ベクトルをコピーする
@@ -220,26 +208,26 @@ Vector3.clone = function(vec, dest) {
     dest[2] = vec[2];
     return dest;
 };
-Vector3.fromAngles = function(theta, phi, dest) {
-    if (typeof dest === 'undefined') {
-        dest = this.create();
-    }
-    dest[0] = Math.cos(theta) * Math.cos(phi);
-    dest[1] = Math.sin(phi);
-    dest[2] = Math.sin(theta) * Math.cos(phi);
-    return dest;
-};
-Vector3.randomDirection = function() {
-    return this.fromAngles(Math.random() * Math.PI * 2, Math.asin(Math.random() * 2 - 1));
-};
+/** 
+ * 線形補間する
+ * @param {Float32Array[3]} vec1 対象ベクトル
+ * @param {Float32Array[3]} vec2 対象ベクトル
+ * @param {Float32Array[3]|number} fraction 量
+ * @return {Float32Array[3]} 書き込み先ベクトル
+ */
 Vector3.lerp = function(vec1, vec2, fraction, dest) {
-    this.subtract(vec2, vec1, dest);
-    this.multiply(dest, fraction, dest);
-    return this.add(dest, vec1, dest);
+    Vector3.subtract(vec2, vec1, dest);
+    Vector3.multiply(dest, fraction, dest);
+    return Vector3.add(dest, vec1, dest);
 };
-Vector3.angleBetween = function(v1, v2) {
-    return this.angleTo(v1, v2);
-};
+/** 
+ * スカラー乗積を計算する
+ * @param {Float32Array[3]} vec 対象ベクトル
+ * @param {number} x X要素
+ * @param {number} y Y要素
+ * @param {number} z Z要素
+ * @return {number} 計算結果
+ */
 Vector3.innerProduct = function(vec, x, y, z) {
     return vec[0] * x + vec[1] * y + vec[2] * z;
 };
@@ -629,3 +617,9 @@ MathUtil._multiplyMatrixByVector4by4 = function (resultvector, matrix, pvector) 
     resultvector[3]=matrix[3]*pvector[0]+matrix[7]*pvector[1]+matrix[11]*pvector[2]+matrix[15]*pvector[3];
     return resultvector;
 };
+
+if (typeof (exports) !== 'undefined') {
+    exports.Vector3 = Vector3;
+    exports.Matrix44 = Matrix44;
+    exports.MathUtil = MathUtil;
+}
