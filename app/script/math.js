@@ -527,6 +527,7 @@ Matrix44.inverse = function(mat, dest) {
 
 /** 
  * MathUtil
+ * その他ユーティリティ
  */
 var MathUtil = function() {
 };
