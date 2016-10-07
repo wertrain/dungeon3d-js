@@ -1,6 +1,8 @@
 'use strict';
 
 {
+    /** @const */
+    const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
     /** 
      * 2次元配列拡張クラス
      * @constructor 
@@ -738,11 +740,6 @@
         return ['shader/vertex.vs', 'shader/fragment.fs', 'image/wall.png', 'image/floor.png'];
     };
 
-    if (typeof dungeon3d === 'undefined') {
-        exports.Map = Map;
-        exports.Array2d = Array2d;
-    } else {
-        dungeon3d.Map = Map;
-        dungeon3d.MapRenderer = MapRenderer;
-    }
+    outer.Map = Map;
+    outer.Array2d = Array2d;
 }
