@@ -3,23 +3,23 @@
 {
     /** @const */
     const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
-    /** 
+    /**
      * キャラクター
-     * @constructor 
+     * @constructor
      */
     let CharaData = function() {
         outer.RouteMovableObject.call(this);
     };
     Object.setPrototypeOf(CharaData.prototype, outer.RouteMovableObject.prototype);
-    /** 
+    /**
      * キャラクター管理
-     * @constructor 
+     * @constructor
      */
     let CharaManager = function() {
         this.map = null;
         this.charaArray = [];
     };
-    /** 
+    /**
      * キャラクター管理を初期化する
      * @param {dungeon3d.Map} map マップオブジェクト
      */
@@ -30,7 +30,7 @@
             return map.isFloor(x, y);
         });
     };
-    /** 
+    /**
      * 全キャラクターを更新する
      * @param {number} time 現在時間
      */
@@ -43,7 +43,7 @@
         }
         return result;
     };
-    /** 
+    /**
      * キャラクターを移動する
      * @param {number} index キャラクター配列のインデックス番号
      * @param {number} x 移動位置X
@@ -57,12 +57,12 @@
         }
         let chara = this.charaArray[index];
         if (chara === null) {
-            return false; 
+            return false;
         }
         let pos = {x: x, y: y};
         return this.routefinder.moveTo(chara, time, pos);
     };
-    /** 
+    /**
      * 指定された位置にキャラクターを設置する
      * @param {number} x 設置位置X
      * @param {number} y 設置位置Y
@@ -81,14 +81,14 @@
         this.charaArray.push(chara);
         return true;
     };
-    /** 
+    /**
      * キャラクターデータ配列を取得する
      * @return {Array.<CharaData>} キャラクターデータ配列
      */
     CharaManager.prototype.getCharaArray = function() {
         return this.charaArray;
     };
-    /** 
+    /**
      * 指定された index 番目のキャラクターを取得する
      * @param {number} index インデックス
      * @return {CharaData} キャラクターデータ
@@ -96,9 +96,9 @@
     CharaManager.prototype.getChara = function(index) {
         return this.charaArray[index];
     };
-    /** 
+    /**
      * キャラクター描画
-     * @constructor 
+     * @constructor
      */
     let CharaRenderer = function() {
         this.charaManager = null;
@@ -109,7 +109,7 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
-    /** 
+    /**
      * キャラクター描画を初期化する
      * @param {dungeon3d.CharaManager} charaManager キャラクター管理
      * @param {SimpleGL} sgl WebGL ユーティリティ
@@ -123,8 +123,8 @@
         this.program = sgl.linkProgram(vs, fs);
         gl.useProgram(this.program);
 
-        this.textureArray['player_move'] = ptex; 
-        
+        this.textureArray['player_move'] = ptex;
+
         this.charaManager = charaManager;
         let charaV = [-0.2, 0.6, -0.0, -0.2, 0.0, 0.0, 0.2, 0.0, 0.0, 0.2, 0.6, -0.0];
         let charaArray = this.charaManager.getCharaArray();
@@ -171,7 +171,7 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    /** 
+    /**
      * 全キャラクターを描画する
      * @param {dungeon3d.CharaManager} charaManager キャラクター管理
      * @param {webgl} gl webgl オブジェクト
@@ -188,7 +188,7 @@
         Matrix44.multiply(mScale, mRot, mRot);
 
         let dir = Math.floor(((Math.floor(viewRot.yaw * 8.0 / Math.PI) + 17) & 15) / 2);
-        
+
         let v = camera.getViewDistance();
         let vx = 0.15 * v[0] / v[1];
         let vz = 0.15 * v[2] / v[1];
@@ -238,12 +238,12 @@
 
         gl.disable(gl.BLEND);
     };
-    /** 
+    /**
      * 描画に必要なリソース配列を取得する
      * @return {Array.<string>} リソースまでのパスの配列
      */
     CharaRenderer.getNeedResouces = function() {
-        return ['shader/vertex.vs', 'shader/fragment.fs', 'image/player_move.png'];
+        return ['app/shader/vertex.vs', 'app/shader/fragment.fs', 'app/image/player_move.png'];
     };
     outer.CharaRenderer = CharaRenderer;
     outer.CharaManager = CharaManager;

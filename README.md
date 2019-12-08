@@ -4,7 +4,7 @@
 
 ## Demo
 
-[http://wertrain.github.io/demo/dungeon3d-js/](http://wertrain.github.io/demo/dungeon3d-js/)
+[https://wertrain.github.io/dungeon3d-js/](https://wertrain.github.io/dungeon3d-js/)
 
 ## Build / Execute / Test
 

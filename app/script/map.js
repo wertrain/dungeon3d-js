@@ -3,9 +3,9 @@
 {
     /** @const */
     const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
-    /** 
+    /**
      * 2次元配列拡張クラス
-     * @constructor 
+     * @constructor
      */
     let Array2d = function(width, height) {
         let o = new Array(height);
@@ -20,37 +20,37 @@
         };
         return o;
     };
-    
-    /** 
+
+    /**
      * 四角形の配置管理クラス
-     * @constructor 
+     * @constructor
      */
     let RectManager = function() {
         this.rect = null; // Array2d型に配列で4頂点分格納される [位置x, 位置y, 位置z, 法線x, 法線y, 法線z, テクスチャUV, テクスチャUV] * 4つ
         this.rectOrder = null;
         this.vertexArray = null;
         this.wall = null;
-        
+
         this.width = 0;
         this.height = 0;
-        
+
         this.wallNum = 0;
         this.rectNum = 0;
         this.endVertex = 0;
         this.section = [0, 0, 0, 0];
     };
-    /** 
+    /**
      * 初期化
-     * @param {Array.<Array.<number>>} map マップ二次元配列 
+     * @param {Array.<Array.<number>>} map マップ二次元配列
      * @param {number} width map の要素数
      * @param {number} height map の要素数
      */
     RectManager.prototype.initalize = function(map, width, height) {
         this.width = width;
         this.height = height;
-        
+
         this.rect = new Array2d(this.width, this.height);
-        
+
         let count = 0;
         for (let z = 1; z < this.height; ++z) {
             for (let x = 0; x < this.width; ++x) {
@@ -68,9 +68,9 @@
         this.rectOrder = new Array((this.width * this.height) + this.width);
         this.vertexArray = new Array((this.width * this.height * 4) + (this.width * 4));
     };
-    /** 
+    /**
      * 床を構築する
-     * @param {Array.<Array.<number>>} map マップ二次元配列 
+     * @param {Array.<Array.<number>>} map マップ二次元配列
      * @param {number} mulx 床面テクスチャの縦
      * @param {number} muly 床面テクスチャの横
      */
@@ -151,9 +151,9 @@
         this.section[0] = this.rectNum * 2;
         this.endVertex = index;
     };
-    /** 
+    /**
      * 壁を構築する
-     * @param {Array.<Array.<number>>} map マップ二次元配列 
+     * @param {Array.<Array.<number>>} map マップ二次元配列
      */
     RectManager.prototype.makeTopWall = function(map) {
         let index = this.endVertex;
@@ -199,7 +199,7 @@
                             this.rect[z][x][2] = index; this.vertexArray[index++] = [x2, y, z2, 0, 1, 0, 0, 0];
                             this.rect[z][x][3] = this.rect[z-1][x][2];
                             break;
-                            
+
                         case 3:
                             this.rect[z][x][0] = this.rect[z][x-1][3];
                             this.rect[z][x][1] = this.rect[z][x-1][2];
@@ -213,7 +213,7 @@
                             this.rect[z][x][2] = index; this.vertexArray[index++] = [x2, y, z2, 0, 1, 0, 0, 0];
                             this.rect[z][x][3] = this.rect[z-1][x+1][1];
                             break;
-                            
+
                         case 5:
                             this.rect[z][x][0] = this.rect[z][x-1][3];
                             this.rect[z][x][1] = this.rect[z][x-1][2];
@@ -228,9 +228,9 @@
         this.section[1] = this.rectNum * 2;
         this.endVertex = index;
     };
-    /** 
+    /**
      * 外壁を構築する
-     * @param {Array.<Array.<number>>} map マップ二次元配列 
+     * @param {Array.<Array.<number>>} map マップ二次元配列
      */
     RectManager.prototype.makeOuterWall = function(map) {
         let index = this.endVertex;
@@ -331,7 +331,7 @@
         this.endVertex = index;
         this.wallNum = widX;
     };
-    /** 
+    /**
      * 内壁を構築する
      * @param {Array.<Array.<number>>} map マップ二次元配列
      * @param {number} mulx 壁テクスチャの縦
@@ -403,56 +403,56 @@
         this.endVertex = index;
         this.wallNum = widX;
     };
-    /** 
+    /**
      * 面数を取得する
      * @return {number} 面数
      */
     RectManager.prototype.getFaceCount = function() {
         return this.rectNum * 2;
     };
-    /** 
+    /**
      * 頂点数を取得する
      * @return {number} 頂点数
      */
     RectManager.prototype.getVertexCount = function() {
         return this.endVertex;
     };
-    /** 
+    /**
      * 矩形配列（床面のインデックス）を取得する
      * @return {Array2d.<Array.<Array.<number>>>} 矩形配列
      */
     RectManager.prototype.getRect = function() {
         return this.rect;
     };
-    /** 
+    /**
      * 矩形配列（壁面のインデックス）を取得する
      * @return {Array2d.<Array.<number>>} 壁数
      */
     RectManager.prototype.getWall = function() {
         return this.wall;
     };
-    /** 
+    /**
      * 壁面数を取得する
      * @return {number} 壁面数
      */
     RectManager.prototype.getWallNum = function() {
         return this.wallNum;
     };
-    /** 
+    /**
      * 頂点配列を取得する
      * @return {Array.<Array.<*>>} 頂点配列
      */
     RectManager.prototype.getVertexArray = function() {
         return this.vertexArray;
     };
-    /** 
+    /**
      * 矩形配列（順序考慮済み）を取得する
      * @return {Array2d.<Array.<Array.<number>>>} 矩形配列
      */
     RectManager.prototype.getRectOrder = function() {
         return this.rectOrder;
     };
-    /** 
+    /**
      * 構築した情報を表示
      */
     RectManager.prototype.debugPrint = function() {
@@ -466,10 +466,10 @@
         console.log('this.section[0]: ' + this.section[0]);
         console.log('this.endVertex: ' + this.endVertex);
     };
-    
-    /** 
+
+    /**
      * マップクラス
-     * @constructor 
+     * @constructor
      */
     let Map = function() {
         this.map = null;
@@ -477,7 +477,7 @@
         this.height = 0;
         this.rectManager = null;
     };
-    /** 
+    /**
      * マップを初期化する
      */
     Map.prototype.initalize = function() {
@@ -521,21 +521,21 @@
         this.rectManager.makeInnerWall(this.map, 1, 1);
         return true;
     };
-    /** 
+    /**
      * 2Dマップ幅を取得する
      * @return {number} 2Dマップ幅
      */
     Map.prototype.getWidth = function() {
         return this.width;
     };
-    /** 
+    /**
      * 2Dマップ高さを取得する
      * @return {number} 2Dマップ高さ
      */
     Map.prototype.getHeight = function() {
         return this.height;
     };
-    /** 
+    /**
      * 床面の高さを取得する
      * @param {number} x 高さを取得する位置X
      * @param {number} y 高さを取得する位置Y
@@ -543,7 +543,7 @@
     Map.prototype.getY = function(x, y) {
         return this.map[y][x];
     };
-    /** 
+    /**
      * 床面であるかを判定する
      * @param {number} x 判定する位置X
      * @param {number} y 判定する位置Y
@@ -553,7 +553,7 @@
         let vertexArray = this.rectManager.getVertexArray();
         return vertexArray[rect[y][x][0]][1] === 0;
     };
-    /** 
+    /**
      * 床面とレイの交差判定を行う
      * @param {Array.<number>} ray レイの始点
      * @param {Array.<number>} rayDir レイの向き
@@ -590,8 +590,8 @@
         return null;
     };
 
-    /** 
-     * マップ描画 
+    /**
+     * マップ描画
      * @constructor
      */
     let MapRenderer = function() {
@@ -602,8 +602,8 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
-    /** 
-     * マップ描画を初期化する 
+    /**
+     * マップ描画を初期化する
      * @param {Map} map マップオブジェくtp
      * @param {SimpleGL} sgl WebGL ユーティリティ
      * @param {Array.<*>} resouces リソースデータ配列（getNeedResoucesで要求したデータ）
@@ -624,12 +624,12 @@
         let rect = map.rectManager.getRectOrder();
         let vertexArray = map.rectManager.getVertexArray();
         let vboArray = [], tboArray = [];
-        for (let i = 0; i < rect.length; ++i) { 
+        for (let i = 0; i < rect.length; ++i) {
             let vertices = [], uvs = [];
             for (let j = 0; j < rect[i].length; ++j) {
-                Array.prototype.push.apply(vertices, 
+                Array.prototype.push.apply(vertices,
                     vertexArray[rect[i][j]].slice(0, 3));
-                Array.prototype.push.apply(uvs, 
+                Array.prototype.push.apply(uvs,
                     vertexArray[rect[i][j]].slice(6, 8));
             }
             let vbo = sgl.createVBO(vertices);
@@ -654,9 +654,9 @@
         //     for (let x = 0; x < map.width; ++x) {
         //         let vertices = [], uvs = [];
         //         for (let i = 0; i < 4; ++i) {
-        //             Array.prototype.push.apply(vertices, 
+        //             Array.prototype.push.apply(vertices,
         //                 vertexArray[rect[y][x][i]].slice(0, 3));
-        //             Array.prototype.push.apply(uvs, 
+        //             Array.prototype.push.apply(uvs,
         //                 vertexArray[rect[y][x][i]].slice(6, 8));
         //         }
         //         let vbo = sgl.createVBO(vertices);
@@ -670,9 +670,9 @@
         // for (let z = 0; z < map.rectManager.getWallNum(); ++z) {
         //     let vertices = [], uvs = [];
         //     for (let i = 0; i < 4; ++i) {
-        //         Array.prototype.push.apply(vertices, 
+        //         Array.prototype.push.apply(vertices,
         //             vertexArray[wall[z][i]].slice(0, 3));
-        //         Array.prototype.push.apply(uvs, 
+        //         Array.prototype.push.apply(uvs,
         //             vertexArray[wall[z][i]].slice(6, 8));
         //     }
         //     let vbo = sgl.createVBO(vertices);
@@ -684,7 +684,7 @@
         // this.renderObject.vboArray = vboArray;
         // this.renderObject.tboArray = tboArray;
         // this.renderObject.textureArray = textureIndexArray;
-        
+
         let vertexIndices = [0, 1, 3, 3, 2, 1];
         let ibo = sgl.createIBO(vertexIndices);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
@@ -702,7 +702,7 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    /** 
+    /**
      * マップを描画する
      * @param {webgl} gl webgl オブジェクト
      * @param {Array.<number>} view ビュー行列
@@ -732,14 +732,15 @@
             gl.drawElements(gl.TRIANGLES, this.renderObject.indicesLength, gl.UNSIGNED_SHORT, 0);
         }
     };
-    /** 
+    /**
      * 描画に必要なリソース配列を取得する
      * @return {Array.<string>} リソースまでのパスの配列
      */
     MapRenderer.getNeedResouces = function() {
-        return ['shader/vertex.vs', 'shader/fragment.fs', 'image/wall.png', 'image/floor.png'];
+        return ['app/shader/vertex.vs', 'app/shader/fragment.fs', 'app/image/wall.png', 'app/image/floor.png'];
     };
 
     outer.Map = Map;
     outer.Array2d = Array2d;
+    outer.MapRenderer = MapRenderer;
 }

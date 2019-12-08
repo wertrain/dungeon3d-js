@@ -3,9 +3,9 @@
 {
     /** @const */
     const outer = typeof (dungeon3d) === 'undefined' ? exports : dungeon3d;
-    /** 
+    /**
      * カーソルクラス
-     * @constructor 
+     * @constructor
      */
     let Cursor = function() {
         this.x = 0; // 2D マップ上のX位置
@@ -13,7 +13,7 @@
         this.position = []; // 3D 上の位置
         this.visible = false;
     };
-    /** 
+    /**
      * カーソルを設置する
      * @param {x} x 設置位置X
      * @param {y} y 設置位置Y
@@ -26,13 +26,13 @@
         this.visible = true;
         return true;
     };
-    /** 
+    /**
      * カーソルを非表示にする
      */
     Cursor.prototype.hide = function() {
         this.visible = false;
     };
-    /** 
+    /**
      * カーソルを位置を取得する
      * @return {object} カーソル位置 {x, y}
      */
@@ -42,16 +42,16 @@
             y: this.y
         };
     };
-    /** 
+    /**
      * カーソルの表示状態を取得する
      * @return {boolean} カーソルが表示されていれば true
      */
     Cursor.prototype.isVisible = function() {
         return this.visible;
     };
-    /** 
+    /**
      * カーソル描画クラス
-     * @constructor 
+     * @constructor
      */
     let CursorRenderer = function() {
         this.cursor = null;
@@ -62,7 +62,7 @@
         this.attLocationArray = [];
         this.attStrideArray = [];
     };
-    /** 
+    /**
      * カーソル描画を初期化する
      * @param {Cursor} cursor カーソル
      * @param {SimpleGL} sgl WebGL ユーティリティ
@@ -75,7 +75,7 @@
         this.texture = sgl.createTexture(resouces[2]);
         this.program = sgl.linkProgram(vs, fs);
         gl.useProgram(this.program);
-        
+
         this.cursor = cursor;
         let vbo = sgl.createVBO([-0.5, 0.0, -0.5, -0.5, 0.0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, -0.5]);
         let tbo = sgl.createVBO([0, 0, 1, 0, 1, 1, 0, 1]);
@@ -97,7 +97,7 @@
         this.attStrideArray['textureCoord'] = 2;
         this.attStrideArray['normal'] = 3;
     };
-    /** 
+    /**
      * カーソルを描画する
      * @param {webgl} gl webgl オブジェクト
      * @param {Array.<number>} view ビュー行列
@@ -134,12 +134,12 @@
 
         gl.disable(gl.BLEND);
     };
-    /** 
+    /**
      * 描画に必要なリソース配列を取得する
      * @return {Array.<string>} リソースまでのパスの配列
      */
     CursorRenderer.getNeedResouces = function() {
-        return ['shader/vertex.vs', 'shader/fragment.fs', 'image/cursor.png'];
+        return ['app/shader/vertex.vs', 'app/shader/fragment.fs', 'app/image/cursor.png'];
     };
 
     outer.CursorRenderer = CursorRenderer;
